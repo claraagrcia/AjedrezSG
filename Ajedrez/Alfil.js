@@ -1,16 +1,13 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
+import { Pieza } from './Pieza.js';
  
-class Alfil extends THREE.Object3D {
-  constructor(gui,titleGui) {
-    super();
+class Alfil extends Pieza {
+  constructor(color) {
+    super(color);
     
-    // Se crea la parte de la interfaz que corresponde a la caja
-    // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
-    this.createGUI(gui,titleGui);
-
     // Material
-    var Mat = new THREE.MeshNormalMaterial;
+    var Mat = new THREE.MeshStandardMaterial({color: color});
     
     //Creampos  la forma del cuerpo
     var shape1_cuerpo = new THREE.Shape();
