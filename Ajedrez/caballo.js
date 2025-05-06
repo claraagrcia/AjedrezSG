@@ -3,6 +3,7 @@ import * as CSG from '../libs/three-bvh-csg.js'
 import { MTLLoader } from '../libs/MTLLoader.js'
 import { OBJLoader } from '../libs/OBJLoader.js'
 import { Pieza } from './Pieza.js' 
+import {lila} from './Tablero.js'
 
 class caballo extends Pieza {
   constructor(color) {
@@ -92,8 +93,13 @@ class caballo extends Pieza {
     var soporteMesh = new THREE.Mesh(soporte, material);
     caballo.add(soporteMesh);
     
-    caballo.scale.set(0.3,0.3,0.3);
-    caballo.translateY(0.135);
+    caballo.scale.set(0.4,0.4,0.4);
+    caballo.translateY(0.18);
+    
+    if(color == lila) {
+      caballo.rotateY(Math.PI);
+    }
+
     this.add(caballo);
 
   }

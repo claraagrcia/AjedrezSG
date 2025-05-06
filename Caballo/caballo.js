@@ -94,8 +94,8 @@ class caballo extends THREE.Object3D {
     var soporteMesh = new THREE.Mesh(soporte, material);
     caballo.add(soporteMesh);
   
-    caballo.scale.set(0.3,0.3,0.3);
-    caballo.translateY(0.135);
+    caballo.scale.set(0.4,0.4,0.4);
+    caballo.translateY(0.18);
     
     this.add(caballo);
 

@@ -65,6 +65,8 @@ class torre extends Pieza{
     this.createDeco(torre);
 
     torre.scale.set(0.3,0.3,0.3);
+    torre.translateX(-0.23);
+    torre.translateY(0.16);
     this.add(torre);
 
   }

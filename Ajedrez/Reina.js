@@ -1,6 +1,7 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from './Pieza.js';
+import { lila } from './Tablero.js';
  
 class Reina extends Pieza {
   constructor(color) {
@@ -193,6 +194,9 @@ class Reina extends Pieza {
     reina.add(brazo_izq);
     
     reina.scale.set(0.2,0.2,0.2);
+    if(color == lila) {
+      reina.rotateY(Math.PI);
+    }
     this.add(reina);
 
   }
