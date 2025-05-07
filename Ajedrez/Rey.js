@@ -219,7 +219,7 @@ class Rey extends Pieza {
     rey.add(brazoIzquierdo);
     rey.add(brazoDerecho);
 
-    rey.scale.set(0.2,0.2,0.2);
+    rey.scale.set(0.25,0.25,0.25);
     if(color == lila) {
       rey.rotateY(Math.PI);
     }
