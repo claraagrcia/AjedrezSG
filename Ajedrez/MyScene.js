@@ -9,6 +9,7 @@ import  Stats from '../libs/stats.module.js'
 // Clases de mi proyecto
 import { Tablero } from './Tablero.js'
 import { Casilla } from './Casilla.js'
+import { Pieza } from './Pieza.js'
  
 /// La clase fachada del modelo
 /**
@@ -50,7 +51,34 @@ class MyScene extends THREE.Scene {
     // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
     this.model = new Tablero(this.gui, "Controles de la Caja");
     this.add (this.model);
+
+    //this.model.casillas[4][7].pieza.movimientosPosibles(this.model,this.model.casillas[4][7]);
+
+    // this.raycaster = new THREE.Raycaster();
+    // this.mouse = new THREE.Vector2();
+    // this.piezaSeleccionada = null;
+
+    // window.addEventListener('click', (event) => this.onClick(event));
   }
+
+  // onClick(event) {
+  //   this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  //   this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
+
+  //   this.raycaster.setFromCamera(this.mouse,this.camera);
+
+  //   var pickedObjects = this.raycaster.intersectObjects(this.model.pickableObjects,true);
+  //   if(pickedObjects.length>0) {
+  //     let objeto = pickedObjects[0].object;
+  //     if(objeto.userData && objeto.userData.pieza instanceof Pieza) {
+  //       this.piezaSeleccionada = objeto.userData.pieza;
+  //       this.piezaSeleccionada.movimientosPosibles(this.model);
+  //     }
+  //     else {
+  //       console.log("No es una pieza");
+  //     }
+  //   }
+  // }
   
   initStats() {
   

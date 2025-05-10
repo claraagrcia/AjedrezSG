@@ -1,7 +1,8 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from './Pieza.js';
-import { lila } from './Tablero.js';
+import { lila,verde } from './Tablero.js';
+import { Casilla } from './Casilla.js';
  
 class Reina extends Pieza {
   constructor(color) {
@@ -198,8 +199,15 @@ class Reina extends Pieza {
       reina.rotateY(Math.PI);
     }
     this.add(reina);
-
   }
+
+  //   this.meshClicable = reina;
+  //   this.meshClicable.userData = {pieza: this};
+
+  // }
+  // obtenerMesh() {
+  //   return this.meshClicable;
+  // }
 
   generarHuecos(num_huecos,radio,altura) {
 
@@ -295,6 +303,120 @@ class Reina extends Pieza {
 
     return brazo;
    
+  }
+
+  movimientoPosibles(tablero,casilla) {
+
+    let casilla_actual;
+    let i=casilla.posX;
+    let j=casilla.posY;
+    
+    //Arriba
+    while (j>0) {
+      j--;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+      
+      if(casilla_actual.pieza != null) {
+        j=0;
+      }
+    }
+
+    //Abajo
+    j=casilla.posY;
+    while (j<7) {
+      j++;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+
+      if(casilla_actual.pieza != null) {
+        j=7;
+      }
+    }
+
+    //Derecha
+    j=casilla.posY;
+    while(i<7) {
+      i++;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+
+      if(casilla_actual.pieza != null) {
+        i=7;
+      }
+    }
+
+    //Izquierda
+    i=casilla.posX;
+    while (i>0) {
+      i--;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+      
+      if(casilla_actual.pieza != null) {
+        i=0;
+      }
+    }
+
+    //Diagonal ++
+    i=casilla.posX;
+    while(i<7 && j>0) {
+      i++;
+      j--;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+
+      if(casilla_actual.pieza != null) {
+        i=7;
+        j=0;
+      }
+    }
+
+    //Diagonal +-
+    i=casilla.posX;
+    j=casilla.posY;
+    while(i<7 && j<7) {
+      i++;
+      j++;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+
+      if(casilla_actual.pieza != null) {
+        i=7;
+        j=7;
+      }
+    }
+
+    //Diagonal --
+    i=casilla.posX;
+    j=casilla.posY;
+    while(i>0 && j<7) {
+      i--;
+      j++;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+
+      if(casilla_actual.pieza != null) {
+        i=0;
+        j=7;
+      }
+    }
+
+    //Diagonal -+
+    i=casilla.posX;
+    j=casilla.posY;
+    while(i>0 && j>0) {
+      i--;
+      j--;
+      casilla_actual = tablero[i][j];
+      casilla_actual.resaltarColor(verde);
+
+      if(casilla_actual.pieza != null) {
+        i=0;
+        j=0;
+      }
+    }
+
   }
 }
 
