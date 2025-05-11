@@ -16,7 +16,7 @@ class Tablero extends THREE.Object3D {
         super();
 
         this.createGUI(gui,titleGui);
-        this.pickableObjects = [];
+        this.piezas_seleccionables = [];
 
         this.casillas = [];
         for(let i=0; i<8; i++) {
@@ -58,9 +58,10 @@ class Tablero extends THREE.Object3D {
         // this.casillas[5][7].setPieza(new Alfil(lila));
 
         // this.casillas[3][7].setPieza(new Rey(lila));
-         let reinaLila = new Reina(lila);
-         this.casillas[4][5].setPieza(reinaLila);
-         //this.pickableObjects.push(reinaLila.obtenerMesh());
+         let casilla = this.casillas[4][5];
+         let reinaLila = new Reina(lila,casilla);
+         casilla.setPieza(reinaLila);
+         this.piezas_seleccionables.push(reinaLila.reina);
 
         //Peones
         for(let i=0; i<8; i++) {
@@ -68,7 +69,7 @@ class Tablero extends THREE.Object3D {
             this.casillas[i][6].setPieza(new peon(lila));
         }
         
-        reinaLila.movimientoPosibles(this.casillas,this.casillas[4][5]);
+        //reinaLila.movimientoPosibles(this.casillas);
     }
 
     createGUI (gui,titleGui) {

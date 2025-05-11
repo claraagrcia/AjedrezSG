@@ -5,8 +5,8 @@ import { lila,verde } from './Tablero.js';
 import { Casilla } from './Casilla.js';
  
 class Reina extends Pieza {
-  constructor(color) {
-    super(color);
+  constructor(color,casilla) {
+    super(color,casilla);
    
     // Material
     this.Mat = new THREE.MeshStandardMaterial({color: color});
@@ -182,33 +182,47 @@ class Reina extends Pieza {
     brazo_izq.translateY(5.4);
     brazo_izq.rotateZ(0.2);
   
-    var reina = new THREE.Object3D();
-    reina.add(base);
-    reina.add(cuerpo);
-    reina.add(base_capitel);
-    reina.add(base_espirales);
-    reina.add(espirales_delanteras);
-    reina.add(espirales_traseras);
-    reina.add(corona);
-    reina.add(lanza);
-    reina.add(brazo_dcho);
-    reina.add(brazo_izq);
+    this.reina = new THREE.Object3D();
+    this.reina.add(base);
+    this.reina.add(cuerpo);
+    this.reina.add(base_capitel);
+    this.reina.add(base_espirales);
+    this.reina.add(espirales_delanteras);
+    this.reina.add(espirales_traseras);
+    this.reina.add(corona);
+    this.reina.add(lanza);
+    this.reina.add(brazo_dcho);
+    this.reina.add(brazo_izq);
     
-    reina.scale.set(0.2,0.2,0.2);
+    this.reina.scale.set(0.2,0.2,0.2);
     if(color == lila) {
-      reina.rotateY(Math.PI);
+      this.reina.rotateY(Math.PI);
     }
-    this.add(reina);
+
+    this.reina.userData.refPieza = this;
+    this.add(this.reina);
+  }
+  getMesh() {
+    return this.reina;
   }
 
-  //   this.meshClicable = reina;
-  //   this.meshClicable.userData = {pieza: this};
+  onClick(tablero) {
+    this.seleccionada = !this.seleccionada;
+    console.log("Pieza seleccionada",this);
+    let casillas_validas = this.movimientoPosibles(tablero);
 
-  // }
-  // obtenerMesh() {
-  //   return this.meshClicable;
-  // }
+    casillas_validas.forEach(casilla_valida => {
+      if(this.seleccionada) {
+        casilla_valida.setColor(verde);
+      }
+      else {
+        casilla_valida.setColor(casilla_valida.colorInicial);
+      }
+    }) 
 
+    return casillas_validas;
+  }
+ 
   generarHuecos(num_huecos,radio,altura) {
 
     var huecos = null;
@@ -305,117 +319,153 @@ class Reina extends Pieza {
    
   }
 
-  movimientoPosibles(tablero,casilla) {
+  movimientoPosibles(tablero) {
 
+    let casillas_validas = [];
     let casilla_actual;
-    let i=casilla.posX;
-    let j=casilla.posY;
+    let i=this.casilla.posX;
+    let j=this.casilla.posY;
     
     //Arriba
     while (j>0) {
       j--;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-      
-      if(casilla_actual.pieza != null) {
+
+      if(casilla_actual.pieza!=null) {
         j=0;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
 
     //Abajo
-    j=casilla.posY;
+    j=this.casilla.posY;
     while (j<7) {
       j++;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-
-      if(casilla_actual.pieza != null) {
+      if(casilla_actual.pieza!=null) {
         j=7;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
 
     //Derecha
-    j=casilla.posY;
+    j=this.casilla.posY;
     while(i<7) {
       i++;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-
-      if(casilla_actual.pieza != null) {
+      if(casilla_actual.pieza!=null) {
         i=7;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
 
     //Izquierda
-    i=casilla.posX;
+    i=this.casilla.posX;
     while (i>0) {
       i--;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-      
-      if(casilla_actual.pieza != null) {
+      if(casilla_actual.pieza!=null) {
         i=0;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
 
     //Diagonal ++
-    i=casilla.posX;
+    i=this.casilla.posX;
     while(i<7 && j>0) {
       i++;
       j--;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-
-      if(casilla_actual.pieza != null) {
+      if(casilla_actual.pieza!=null) {
         i=7;
         j=0;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
 
     //Diagonal +-
-    i=casilla.posX;
-    j=casilla.posY;
+    i=this.casilla.posX;
+    j=this.casilla.posY;
     while(i<7 && j<7) {
       i++;
       j++;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-
-      if(casilla_actual.pieza != null) {
+      if(casilla_actual.pieza!=null) {
         i=7;
         j=7;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
 
     //Diagonal --
-    i=casilla.posX;
-    j=casilla.posY;
+    i=this.casilla.posX;
+    j=this.casilla.posY;
     while(i>0 && j<7) {
       i--;
       j++;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-
-      if(casilla_actual.pieza != null) {
+      if(casilla_actual.pieza!=null) {
         i=0;
         j=7;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
 
     //Diagonal -+
-    i=casilla.posX;
-    j=casilla.posY;
+    i=this.casilla.posX;
+    j=this.casilla.posY;
     while(i>0 && j>0) {
       i--;
       j--;
       casilla_actual = tablero[i][j];
-      casilla_actual.resaltarColor(verde);
-
-      if(casilla_actual.pieza != null) {
+      if(casilla_actual.pieza!=null) {
         i=0;
         j=0;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
       }
     }
+
+    return casillas_validas;
 
   }
 }
