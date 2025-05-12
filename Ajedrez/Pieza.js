@@ -19,27 +19,44 @@ class Pieza extends THREE.Object3D {
         throw new Error("Este método debe ser implementado por la subclase.");
     }
 
-    mover(destino) {
+    mover(casilla_seleccionada) {
+        var destino = casilla_seleccionada.obtenerPosicionMundo(); 
         const posicionActual = this.getMesh().position;
+        const parent = this.getMesh().parent;
+        const destinoLocal = parent.worldToLocal(destino.clone());
 
         new TWEEN.Tween(posicionActual)
             .to({
-            x: destino.x,
-            y: destino.y,
-            z: destino.z
-            }, 1000) // duración en milisegundos
+            x: destinoLocal.x,
+            y: destinoLocal.y,
+            z: destinoLocal.z
+            }, 1000) 
             .easing(TWEEN.Easing.Quadratic.Out)
             .onUpdate(() => {
-            // Actualizar posición si necesitas lógica adicional
+            
             })
             .onComplete(() => {
-            console.log("Movimiento completado");
+                console.log("Movimiento completado");
+
+                //Si la casilla seleccionada tiene una pieza, borrarla
+                if(casilla_seleccionada.pieza != null) {
+                    casilla_seleccionada.removePieza();
+                }
+
+                //Actualizamos la pieza y la casilla
+                this.casilla.actualizarPieza(null);
+                casilla_seleccionada.actualizarPieza(this);
+                this.actualizarCasilla(casilla_seleccionada);
             })
             .start();
     }
 
     getMesh() {
         throw new Error("Este método debe ser implementado por la subclase.");
+    }
+
+    actualizarCasilla(casilla_nueva) {
+        this.casilla = casilla_nueva;
     }
 }
 

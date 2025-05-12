@@ -39,7 +39,7 @@ class MyScene extends THREE.Scene {
     this.createCamera ();
     
     // Un suelo 
-    //this.createGround ();
+    this.createGround ();
     
     // Y unos ejes. Imprescindibles para orientarnos sobre dónde están las cosas
     // Todas las unidades están en metros
@@ -56,9 +56,9 @@ class MyScene extends THREE.Scene {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     this.piezaSeleccionada = null;
-    this.casillas_validas;
+    this.casillas_validas = null;
     this.casilla_seleccionada = null;
-    this.estado = "Esperando pieza";
+    this.estado = 0; //esperando pieza
 
     window.addEventListener('click', (event) => this.onClick(event));
   }
@@ -69,13 +69,12 @@ class MyScene extends THREE.Scene {
 
      this.raycaster.setFromCamera(this.mouse,this.camera);
 
-     if(this.estado == "Esperando pieza") {
+     if(this.estado == 0) {
       var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables,true);
       if(pickedObjects.length>0) {
         let nodo = pickedObjects[0].object;
         while(nodo) {
          if(nodo.userData && nodo.userData.refPieza) {
-           console.log("refPieza encontrado:", nodo.userData.refPieza);
            this.piezaSeleccionada = nodo.userData.refPieza;
            break;
          }
@@ -84,7 +83,7 @@ class MyScene extends THREE.Scene {
  
         if(this.piezaSeleccionada && typeof this.piezaSeleccionada.onClick === 'function') {
          this.casillas_validas = this.piezaSeleccionada.onClick(this.model.casillas);
-         this.estado = "Esperando casilla";
+         this.estado = 1; //esperando casilla
         }
         else {
          console.log("Objeto seleccionado no tiene onClick");
@@ -92,20 +91,26 @@ class MyScene extends THREE.Scene {
       } 
      }
     
-     if(this.estado == "Esperando casilla") {
+     else if(this.estado == 1) {
       var pickedCasillas = this.raycaster.intersectObjects(this.casillas_validas,true);
       if (pickedCasillas.length > 0 && this.piezaSeleccionada) {
         this.casilla_seleccionada = pickedCasillas[0].object.userData;
+
+         // Movemos la pieza a la casilla seleccionada
+          this.piezaSeleccionada.mover(this.casilla_seleccionada);
+
+          //Limpiamos las casillas válidas
+          this.piezaSeleccionada.seleccionada = !this.piezaSeleccionada.seleccionada;
+          this.casillas_validas.forEach(casilla_valida => {
+            casilla_valida.setColor(casilla_valida.colorInicial);
+          }) 
+          
+          this.estado = 0;
     
-          // Mueve la pieza seleccionada a la nueva casilla
-          var destino = this.casilla_seleccionada.obtenerPosicionMundo(); 
-          console.log(destino);
-          this.piezaSeleccionada.mover(destino);
-          this.estado = "Esperando pieza";
-    
-          // Limpiar selección después del movimiento
+          // Limpiar los atributos correspondientes
           this.piezaSeleccionada = null;
           this.casilla_seleccionada = null;
+          this.casillas_validas = null;
       }
      }
     
@@ -167,7 +172,7 @@ class MyScene extends THREE.Scene {
     
     // Todas las figuras se crean centradas en el origen.
     // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
-    ground.position.y = -0.1;
+    ground.position.y = -0.125;
     
     // Que no se nos olvide añadirlo a la escena, que en este caso es  this
     this.add (ground);

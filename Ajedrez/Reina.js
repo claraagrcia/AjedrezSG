@@ -202,13 +202,13 @@ class Reina extends Pieza {
     this.reina.userData.refPieza = this;
     this.add(this.reina);
   }
+
   getMesh() {
     return this.reina;
   }
 
   onClick(tablero) {
     this.seleccionada = !this.seleccionada;
-    console.log("Pieza seleccionada",this);
     let casillas_validas = this.movimientoPosibles(tablero);
 
     casillas_validas.forEach(casilla_valida => {

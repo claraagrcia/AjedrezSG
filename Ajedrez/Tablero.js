@@ -45,7 +45,9 @@ class Tablero extends THREE.Object3D {
         // this.casillas[5][0].setPieza(new Alfil(blanco));
 
         // this.casillas[3][0].setPieza(new Rey(blanco));
-        // this.casillas[4][0].setPieza(new Reina(blanco));
+        let reinaBlanca = new Reina(blanco,this.casillas[4][3]);
+        this.casillas[4][3].setPieza(reinaBlanca);
+        this.piezas_seleccionables.push(reinaBlanca.reina);
 
 
         // this.casillas[0][7].setPieza(new torre(lila));

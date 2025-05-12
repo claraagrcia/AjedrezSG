@@ -24,6 +24,11 @@ class Casilla extends THREE.Object3D{
         this.add(pieza);
     }
 
+    removePieza() {
+        this.remove(this.pieza);
+        this.pieza=null;
+    }
+
     setColor(nuevo_color) {
         this.casilla.material.color.set(nuevo_color);
     }
@@ -32,6 +37,10 @@ class Casilla extends THREE.Object3D{
         const posicion = new THREE.Vector3();
         this.casilla.getWorldPosition(posicion);
         return posicion; 
+    }
+
+    actualizarPieza (pieza_nueva) {
+        this.pieza = pieza_nueva;
     }
 
 }
