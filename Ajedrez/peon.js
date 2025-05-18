@@ -123,6 +123,14 @@ class peon extends Pieza {
         if(casilla_actual.pieza == null) {
           casillas_validas.push(casilla_actual);
         }
+
+        //Casilla de más adelante si es el primer movimiento
+        if(j==1) {
+          casilla_actual = tablero[i][j+2];
+          if(casilla_actual.pieza == null) {
+            casillas_validas.push(casilla_actual);
+          }
+        }
     
         //casilla derecha
         if(i<7) {
@@ -150,6 +158,14 @@ class peon extends Pieza {
         casilla_actual = tablero[i][j-1];
         if(casilla_actual.pieza == null) {
           casillas_validas.push(casilla_actual);
+        }
+
+        //Casilla de más adelante si es el primer movimiento
+        if(j==6) {
+          casilla_actual = tablero[i][j-2];
+          if(casilla_actual.pieza == null) {
+            casillas_validas.push(casilla_actual);
+          }
         }
     
         //casilla derecha
