@@ -25,7 +25,12 @@ class Casilla extends THREE.Object3D{
     }
 
     removePieza() {
-        this.remove(this.pieza);
+        const mesh = this.pieza.getMesh();
+        
+        if(mesh.parent) {
+            mesh.parent.remove(mesh);
+        }
+        
         this.pieza=null;
     }
 

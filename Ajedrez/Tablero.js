@@ -16,7 +16,8 @@ class Tablero extends THREE.Object3D {
         super();
 
         this.createGUI(gui,titleGui);
-        this.piezas_seleccionables = [];
+        this.piezas_seleccionables_lilas = [];
+        this.piezas_seleccionables_blancas = [];
 
         this.casillas = [];
         for(let i=0; i<8; i++) {
@@ -41,13 +42,19 @@ class Tablero extends THREE.Object3D {
         // this.casillas[1][0].setPieza(new caballo(blanco));
         // this.casillas[6][0].setPieza(new caballo(blanco));
 
-        // this.casillas[2][0].setPieza(new Alfil(blanco));
-        // this.casillas[5][0].setPieza(new Alfil(blanco));
+        let alfilBlanco1 = new Alfil(blanco,this.casillas[2][0]);
+        this.casillas[2][0].setPieza(alfilBlanco1);
+        this.piezas_seleccionables_blancas.push(alfilBlanco1.alfil);
+
+        let alfilBlanco2 = new Alfil(blanco,this.casillas[5][0]);
+        this.casillas[5][0].setPieza(alfilBlanco2);
+        this.piezas_seleccionables_blancas.push(alfilBlanco2.alfil);
+
 
         // this.casillas[3][0].setPieza(new Rey(blanco));
         let reinaBlanca = new Reina(blanco,this.casillas[4][3]);
         this.casillas[4][3].setPieza(reinaBlanca);
-        this.piezas_seleccionables.push(reinaBlanca.reina);
+        this.piezas_seleccionables_blancas.push(reinaBlanca.reina);
 
 
         // this.casillas[0][7].setPieza(new torre(lila));
@@ -56,22 +63,32 @@ class Tablero extends THREE.Object3D {
         // this.casillas[1][7].setPieza(new caballo(lila));
         // this.casillas[6][7].setPieza(new caballo(lila));
 
+        let alfilLila1 = new Alfil(lila,this.casillas[2][7]);
+        this.casillas[2][7].setPieza(alfilLila1);
+        this.piezas_seleccionables_lilas.push(alfilLila1.alfil);
+
+        let alfilLila2 = new Alfil(lila,this.casillas[5][7]);
+        this.casillas[5][7].setPieza(alfilLila2);
+        this.piezas_seleccionables_lilas.push(alfilLila2.alfil);
+
         // this.casillas[2][7].setPieza(new Alfil(lila));
         // this.casillas[5][7].setPieza(new Alfil(lila));
 
         // this.casillas[3][7].setPieza(new Rey(lila));
-         let casilla = this.casillas[4][5];
-         let reinaLila = new Reina(lila,casilla);
-         casilla.setPieza(reinaLila);
-         this.piezas_seleccionables.push(reinaLila.reina);
+        let reinaLila = new Reina(lila,this.casillas[4][5]);
+        this.casillas[4][5].setPieza(reinaLila);
+        this.piezas_seleccionables_lilas.push(reinaLila.reina);
 
         //Peones
         for(let i=0; i<8; i++) {
-            this.casillas[i][1].setPieza(new peon(blanco));
-            this.casillas[i][6].setPieza(new peon(lila));
+            let peonBlanco = new peon(blanco,this.casillas[i][1]);
+            let peonLila = new peon(lila,this.casillas[i][6]);
+            this.casillas[i][1].setPieza(peonBlanco);
+            this.casillas[i][6].setPieza(peonLila);
+            this.piezas_seleccionables_blancas.push(peonBlanco.peon);
+            this.piezas_seleccionables_lilas.push(peonLila.peon);
         }
         
-        //reinaLila.movimientoPosibles(this.casillas);
     }
 
     createGUI (gui,titleGui) {

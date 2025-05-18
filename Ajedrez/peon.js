@@ -1,13 +1,14 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from './Pieza.js';
+import { lila,verde,blanco } from './Tablero.js';
  
 class peon extends Pieza {
-  constructor(color) {
-    super(color);
+  constructor(color,casilla) {
+    super(color,casilla);
     
     //Creamos un objeto 3d peon
-    var peon = new THREE.Object3D();
+    this.peon = new THREE.Object3D();
     
     //*********************Cuerpo********************** */
 
@@ -38,7 +39,7 @@ class peon extends Pieza {
     var mesh = new THREE.Mesh( geometry, material);
 
     //Lo añadimos como hijo del Object3D
-    peon.add (mesh);
+    this.peon.add (mesh);
 
     //*****************Cabeza**************** */
     //Para ello definimos las geometrias necesarias
@@ -70,18 +71,106 @@ class peon extends Pieza {
     var resultado = evaluador.evaluate(tmp1, tmp3, CSG.SUBTRACTION);
     //Posicionamos y añadimos al objeto3d
     resultado.position.y = 4.5;
-    peon.add(resultado);
+    this.peon.add(resultado);
 
     //creamos la esfera de dentro de la cabeza, la posicionamos y la añadimos al objeto
     var geometryCabeza = new THREE.SphereGeometry(0.7);
     geometryCabeza.translate(0, 4.5, 0);
     var cabeza = new THREE.Mesh(geometryCabeza, material);
-    peon.add(cabeza);
+    this.peon.add(cabeza);
 
     //Añadimos el peon al grafo de escena
-    peon.scale.set(0.15,0.15,0.15);
-    this.add(peon);
+    this.peon.scale.set(0.15,0.15,0.15);
+
+    this.peon.userData.refPieza = this;
+    this.add(this.peon);
     
+  }
+
+  getMesh() {
+    return this.peon;
+  }
+
+  onClick(tablero) {
+    this.seleccionada = !this.seleccionada;
+    let casillas_validas = this.movimientoPosibles(tablero);
+
+    casillas_validas.forEach(casilla_valida => {
+      if(this.seleccionada) {
+        casilla_valida.setColor(verde);
+      }
+      else {
+        casilla_valida.setColor(casilla_valida.colorInicial);
+      }
+    }) 
+
+    return casillas_validas;
+  }
+
+  movimientoPosibles(tablero) {
+
+    let casillas_validas = [];
+    let casilla_actual;
+    let i=this.casilla.posX;
+    let j=this.casilla.posY;
+    
+    if(this.color == blanco) {
+
+      if(j<7) {
+
+        //casilla de delante
+        casilla_actual = tablero[i][j+1];
+        if(casilla_actual.pieza == null) {
+          casillas_validas.push(casilla_actual);
+        }
+    
+        //casilla derecha
+        if(i<7) {
+          casilla_actual = tablero[i+1][j+1];
+          if(casilla_actual.pieza != null && casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }  
+        }
+    
+        //casilla derecha
+        if(i>0) {
+          casilla_actual = tablero[i-1][j+1];
+          if(casilla_actual.pieza != null && casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }
+        } 
+      }
+    }
+
+    else if(this.color == lila) {
+
+      if(j>0) {
+
+        //casilla de delante
+        casilla_actual = tablero[i][j-1];
+        if(casilla_actual.pieza == null) {
+          casillas_validas.push(casilla_actual);
+        }
+    
+        //casilla derecha
+        if(i<7) {
+          casilla_actual = tablero[i+1][j-1];
+          if(casilla_actual.pieza != null && casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }  
+        }
+    
+        //casilla derecha
+        if(i>0) {
+          casilla_actual = tablero[i-1][j-1];
+          if(casilla_actual.pieza != null && casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }
+        } 
+      }
+    }
+
+    return casillas_validas;
   }
 
 }

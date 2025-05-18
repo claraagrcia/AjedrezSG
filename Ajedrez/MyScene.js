@@ -59,6 +59,7 @@ class MyScene extends THREE.Scene {
     this.casillas_validas = null;
     this.casilla_seleccionada = null;
     this.estado = 0; //esperando pieza
+    this.turno = "lila";
 
     window.addEventListener('click', (event) => this.onClick(event));
   }
@@ -70,7 +71,14 @@ class MyScene extends THREE.Scene {
      this.raycaster.setFromCamera(this.mouse,this.camera);
 
      if(this.estado == 0) {
-      var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables,true);
+      if(this.turno == "lila") {
+        var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables_lilas,true);
+      }
+      else if(this.turno == "blanco") {
+        var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables_blancas,true);
+      }
+      
+      console.log(pickedObjects);
       if(pickedObjects.length>0) {
         let nodo = pickedObjects[0].object;
         while(nodo) {
@@ -83,7 +91,13 @@ class MyScene extends THREE.Scene {
  
         if(this.piezaSeleccionada && typeof this.piezaSeleccionada.onClick === 'function') {
          this.casillas_validas = this.piezaSeleccionada.onClick(this.model.casillas);
-         this.estado = 1; //esperando casilla
+         if(this.casillas_validas.length>0) {
+          this.estado = 1; //esperando casilla
+         }
+         else {
+          this.estado = 0; //elegir otra pieza
+         }
+         
         }
         else {
          console.log("Objeto seleccionado no tiene onClick");
@@ -97,7 +111,7 @@ class MyScene extends THREE.Scene {
         this.casilla_seleccionada = pickedCasillas[0].object.userData;
 
          // Movemos la pieza a la casilla seleccionada
-          this.piezaSeleccionada.mover(this.casilla_seleccionada);
+          this.piezaSeleccionada.mover(this.casilla_seleccionada,this.model);
 
           //Limpiamos las casillas válidas
           this.piezaSeleccionada.seleccionada = !this.piezaSeleccionada.seleccionada;
@@ -106,11 +120,19 @@ class MyScene extends THREE.Scene {
           }) 
           
           this.estado = 0;
+
+          if(this.turno == "lila") {
+            this.turno = "blanco";
+          }
+          else {
+            this.turno = "lila";
+          }
     
           // Limpiar los atributos correspondientes
           this.piezaSeleccionada = null;
           this.casilla_seleccionada = null;
           this.casillas_validas = null;
+          
       }
      }
     

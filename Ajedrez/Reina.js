@@ -2,7 +2,6 @@ import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from './Pieza.js';
 import { lila,verde } from './Tablero.js';
-import { Casilla } from './Casilla.js';
  
 class Reina extends Pieza {
   constructor(color,casilla) {
