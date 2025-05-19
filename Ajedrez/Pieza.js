@@ -58,6 +58,7 @@ class Pieza extends THREE.Object3D {
                 casilla_seleccionada.actualizarPieza(this);
                 this.actualizarCasilla(casilla_seleccionada);
 
+                //Cambiamos el turno y la cámara
                 if(escena.turno == "lila") {
                     console.log("Turno: blanco");
                     escena.turno = "blanco";

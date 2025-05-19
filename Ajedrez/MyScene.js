@@ -124,17 +124,6 @@ class MyScene extends THREE.Scene {
           }) 
           
           this.estado = 0;
-
-          // if(this.turno == "lila") {
-          //   console.log("Turno: blanco");
-          //   this.turno = "blanco";
-          //   this.cambiarCamara(this.turno);
-          // }
-          // else {
-          //   console.log("Turno: lila");
-          //   this.turno = "lila";
-          //   this.cambiarCamara(this.turno);
-          // }
     
           // Limpiar los atributos correspondientes
           this.piezaSeleccionada = null;
@@ -168,10 +157,10 @@ class MyScene extends THREE.Scene {
     //   El ángulo del campo de visión en grados sexagesimales
     //   La razón de aspecto ancho/alto
     //   Los planos de recorte cercano y lejano
-    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 50);
       // Recuerda: Todas las unidades están en metros
       // También se indica dónde se coloca
-      this.camera.position.set (7, 4, 7);
+      this.camera.position.set (5, 10, 5);
       // Y hacia dónde mira
       var look = new THREE.Vector3 (0,0,0);
       this.camera.lookAt(look);
