@@ -7,6 +7,13 @@ class torre extends Pieza{
   constructor(color,casilla) {
     super(color,casilla);
     
+      //var loader = new THREE.TextureLoader ( ) ;
+      //var textura = loader.load("../imgs/texturaMadera.jpg");
+      //var materialMadera = new THREE.MeshStandardMaterial({map:textura, color: this.color });
+
+    var loader = new THREE.TextureLoader ( ) ;
+    var textura = loader.load("../imgs/wood.jpg");
+    var materialMadera = new THREE.MeshStandardMaterial({map:textura , color: color});
     //Crear  la forma
     var contenedor = new THREE.Object3D();
     this.torre = new THREE.Object3D();
@@ -14,52 +21,52 @@ class torre extends Pieza{
     var angle = Math.PI/2;
 
     //Bloque con 3 filas
-    let result = this.createBlock(contenedor, 3, y, angle);
+    let result = this.createBlock(contenedor, 3, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la izquierda
-    result = this.createMiddleHole(contenedor, y, angle);
+    result = this.createMiddleHole(contenedor, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 1 filas
-    result = this.createBlock(contenedor, 1, y, angle);
+    result = this.createBlock(contenedor, 1, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la derecha
-    result = this.createRightRow(contenedor, y, angle);
+    result = this.createRightRow(contenedor, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 2 filas
-    result = this.createBlock(contenedor, 2, y, angle);
+    result = this.createBlock(contenedor, 2, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la izquierda
-    result = this.createLeftRow(contenedor, y, angle);
+    result = this.createLeftRow(contenedor, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la izquierda
-    result = this.createLeftRow(contenedor, y, angle);
+    result = this.createLeftRow(contenedor, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 2 filas
-    result = this.createBlock(contenedor, 2, y, angle);
+    result = this.createBlock(contenedor, 2, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
     
     //Fila con un bloque menos en medio
-    result = this.createMiddleHole(contenedor, y, angle);
+    result = this.createMiddleHole(contenedor, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 2 filas
-    result = this.createBlock(contenedor, 2, y, angle);
+    result = this.createBlock(contenedor, 2, y, angle, materialMadera);
     y = result.y;
     angle = result.angle;
 
@@ -78,7 +85,7 @@ class torre extends Pieza{
    * @brief crea por extrusión uno de los cubos que componen la torre
    * @returns el mesh del cubo
    */
-  createCubo(){
+  createCubo(material){
 
     //Hacemos el shape de un ractángulo con los bordes redondeados
     var shape = new THREE.Shape();
@@ -107,7 +114,6 @@ class torre extends Pieza{
     var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
     geometry.scale(0.3, 0.5, 0.5);
     geometry.rotateX(Math.PI/2);
-    var material = new THREE.MeshStandardMaterial({color: this.color});
     var mesh = new THREE.Mesh(geometry, material);
 
     return mesh;
@@ -122,7 +128,7 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en el que se colocarán los cubos
    * @returns un array con la nueva altura (y) y el nuevo ángulo (angle)
    */
-  createBlock(contenedor, nRows, y, angle){
+  createBlock(contenedor, nRows, y, angle, material){
    
     var unCubo;
 
@@ -132,7 +138,7 @@ class torre extends Pieza{
       //Bucle que construye una fila
       for(var i = 0; i < 3; ++i ){
 
-        unCubo = this.createCubo();
+        unCubo = this.createCubo(material, material);
 
         //Dependiendo de la orientación del cubo, hay que aplicar unas traslaciones u otras
         if(Math.abs(angle % Math.PI) < 1e-6){
@@ -169,12 +175,12 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en la que esta fila estará orientada
    * @returns un array con la altura y el ángulo actualizados
    */
-  createRightRow(contenedor, y, angle){
+  createRightRow(contenedor, y, angle, material){
     
     var unCubo;
     for(var i = 0; i < 2; ++i ){
 
-      unCubo = this.createCubo();
+      unCubo = this.createCubo(material);
 
       if(angle%Math.PI == 0){
 
@@ -205,12 +211,12 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en la que esta fila estará orientada
    * @returns un array con la altura y el ángulo actualizados
    */
-  createLeftRow(contenedor, y, angle){
+  createLeftRow(contenedor, y, angle, material){
     
     var unCubo;
     for(var i = 1; i <= 2; ++i ){
 
-      unCubo = this.createCubo();
+      unCubo = this.createCubo(material);
 
       if(angle%Math.PI == 0){
 
@@ -241,9 +247,9 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en la que esta fila estará orientada
    * @returns un array con la altura y el ángulo actualizados
    */
-  createMiddleHole(contenedor, y, angle){
+  createMiddleHole(contenedor, y, angle, material){
     
-    var unCubo = this.createCubo();
+    var unCubo = this.createCubo(material);
 
     if(angle%Math.PI == 0){
 
@@ -260,7 +266,7 @@ class torre extends Pieza{
     unCubo.rotation.y = angle;
     contenedor.add(unCubo);
 
-    var unCubo = this.createCubo();
+    var unCubo = this.createCubo(material);
 
     if(angle%Math.PI == 0){
 
@@ -289,7 +295,12 @@ class torre extends Pieza{
    */
   createDeco(contenedor){
 
-    var material = new THREE.MeshNormalMaterial();
+    var material = new THREE.MeshStandardMaterial({color:this.color});
+    const materialDorado = new THREE.MeshStandardMaterial({
+      color: 0xffd700,       // Color dorado (hex)
+      metalness: 0.9,        // Máxima apariencia metálica
+      roughness: 0.2,        // Un poco rugoso para dar realismo
+    });
     var esferaGeo = new THREE.SphereGeometry(0.1);
 
     //Creamos el shape del mástil de la bandera
@@ -309,8 +320,8 @@ class torre extends Pieza{
     //Añadimos una esfera de decoración al final del mástil
     esferaGeo.translate(0, 0.3, 0);
 
-    var esferaMesh = new CSG.Brush(esferaGeo, material);
-    var mesh = new CSG.Brush(latheGeometry, material);
+    var esferaMesh = new CSG.Brush(esferaGeo, materialDorado);
+    var mesh = new CSG.Brush(latheGeometry, materialDorado);
 
     //creamos la bandera por extrusión
     var bandera = new THREE.Shape();

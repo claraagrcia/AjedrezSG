@@ -9,6 +9,10 @@ class Rey extends Pieza {
     
     // Material
     this.Mat = new THREE.MeshStandardMaterial({color: color});
+
+    var loader = new THREE.TextureLoader ( ) ;
+    var textura = loader.load("../imgs/marmol-blanco.jpg");
+    var materialMarmol = new THREE.MeshStandardMaterial({map:textura, color:color });
     
     //Creamos la base por revolución
     var shape_base = new THREE.Shape();
@@ -27,12 +31,12 @@ class Rey extends Pieza {
 
     var Geom_base = new THREE.LatheGeometry(puntos_base,24,0,Math.PI*2);
     Geom_base.translate(0,-0.52,0);
-    var base = new THREE.Mesh(Geom_base,this.Mat);
+    var base = new THREE.Mesh(Geom_base, materialMarmol);
 
     //Creamos el cuerpo
     var Geom_cuerpo = new THREE.CylinderGeometry(0.8,0.8,3,32,32);
     Geom_cuerpo.translate(0,3.34,0);
-    var cuerpo_brush = new CSG.Brush(Geom_cuerpo,this.Mat);
+    var cuerpo_brush = new CSG.Brush(Geom_cuerpo, materialMarmol);
 
     //Hacemos los huecos de la columna
     this.evaluador = new CSG.Evaluator();
@@ -65,7 +69,7 @@ class Rey extends Pieza {
     var Geom_cabeza = new THREE.LatheGeometry(puntos_cabeza,24,0,Math.PI*2);
     Geom_cabeza.scale(0.6,0.6,0.6);
     Geom_cabeza.translate(0,4.84,0);
-    var cabeza = new THREE.Mesh(Geom_cabeza,this.Mat);
+    var cabeza = new THREE.Mesh(Geom_cabeza, materialMarmol);
 
     /******************************Corona************************************ */
     
@@ -149,7 +153,7 @@ class Rey extends Pieza {
     });
     
     var pathGeo = new THREE.CatmullRomCurve3(v3);
-    var optionsBarrido = { steps: 50, curveSegments: 6, extrudePath: pathGeo};
+    var optionsBarrido = { steps: 20, curveSegments: 6, extrudePath: pathGeo};
 
     for (let i = 0; i < 8; i++) {
       
@@ -201,11 +205,11 @@ class Rey extends Pieza {
     espada.scale.set(1.5, 1.5, 1.5);
     espada.position.set(0, 4, 2);
 
-    var brazoIzquierdo = this.crearBrazo(false);
+    var brazoIzquierdo = this.crearBrazo(false, materialMarmol);
     brazoIzquierdo.scale.set(0.8, 0.8, 0.8);
     brazoIzquierdo.position.set(-1.1, 5.7, 0.3);
     
-    var brazoDerecho = this.crearBrazo(true);
+    var brazoDerecho = this.crearBrazo(true, materialMarmol);
     brazoDerecho.scale.set(0.8, 0.8, 0.8);
     brazoDerecho.position.set(1.1, 5.7, 0.3);
 
@@ -251,8 +255,8 @@ class Rey extends Pieza {
 
     const metalMaterial = new THREE.MeshStandardMaterial({
         color: 0x9c9c9c,      // color plateado claro
-        metalness: 0.5,       // completamente metálico
-        roughness: 0.45,      // muy pulido, casi como espejo
+        metalness: 0.9,       // completamente metálico
+        roughness: 0.2,      // muy pulido, casi como espejo
         envMapIntensity: 1.5,  // reflejos intensos si hay envMap
         flatShading: true
     });
@@ -332,13 +336,13 @@ class Rey extends Pieza {
     
   }
 
-  crearBrazo(derecho){
+  crearBrazo(derecho, material){
     var brazo = new THREE.Object3D();
         var anteBrazo = new THREE.Object3D();
     
         var manoGeo = new THREE.SphereGeometry(0.4);
         manoGeo.translate(0, -2, 0);
-        var mano = new THREE.Mesh(manoGeo, this.Mat);
+        var mano = new THREE.Mesh(manoGeo, material);
         anteBrazo.add(mano);
     
         var anteBrazoGeo = new THREE.CylinderGeometry(0.3, 0.2, 2);
@@ -355,14 +359,14 @@ class Rey extends Pieza {
         var brazoGeo = new THREE.CylinderGeometry(0.35, 0.3, 2.3);
         brazoGeo.translate(0, -1.25, 0);
     
-        var hombro = new THREE.Mesh(hombroGeo, this.Mat);
+        var hombro = new THREE.Mesh(hombroGeo, material);
         brazo.add(hombro);
-        var brazoMesh = new THREE.Mesh(brazoGeo, this.Mat);
+        var brazoMesh = new THREE.Mesh(brazoGeo, material);
         brazo.add(brazoMesh);
     
         var codoGeo = new THREE.SphereGeometry(0.3);
         codoGeo.translate(0, -2.4, 0);
-        var codo = new THREE.Mesh(codoGeo, this.Mat);
+        var codo = new THREE.Mesh(codoGeo, material);
         brazo.add(codo);
         brazo.rotation.z = Math.pow(-1, derecho)*-Math.PI/13;
         brazo.rotation.x = -Math.PI/3;

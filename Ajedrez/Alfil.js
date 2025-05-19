@@ -8,8 +8,11 @@ class Alfil extends Pieza {
     super(color,casilla);
     
     // Material
-    var Mat = new THREE.MeshStandardMaterial({color: color});
-    
+  
+    const textureLoader = new THREE.TextureLoader();
+    const normalMap = textureLoader.load("../imgs/flor.png");
+    var Mat = new THREE.MeshStandardMaterial({color: color, normalMap: normalMap});
+
     //Creampos  la forma del cuerpo
     var shape1_cuerpo = new THREE.Shape();
     shape1_cuerpo.moveTo(0,-2);

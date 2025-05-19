@@ -9,6 +9,9 @@ class peon extends Pieza {
     
     //Creamos un objeto 3d peon
     this.peon = new THREE.Object3D();
+    const textureLoader = new THREE.TextureLoader();
+    const normalMap = textureLoader.load("../imgs/flor.png");
+    var Mat = new THREE.MeshStandardMaterial({color: color, normalMap: normalMap});
     
     //*********************Cuerpo********************** */
 
@@ -36,7 +39,7 @@ class peon extends Pieza {
     var geometry = new THREE.LatheGeometry(points,24, 0, Math.PI*2);
 
     //Contruimos el Mesh
-    var mesh = new THREE.Mesh( geometry, material);
+    var mesh = new THREE.Mesh( geometry, Mat);
 
     //Lo añadimos como hijo del Object3D
     this.peon.add (mesh);

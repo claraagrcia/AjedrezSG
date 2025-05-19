@@ -11,6 +11,14 @@ class Rey extends THREE.Object3D {
 
     // Material
     this.Mat = new THREE.MeshNormalMaterial;
+    var loader = new THREE.TextureLoader ( ) ;
+    var textura = loader.load("../imgs/marmol-blanco.jpg");
+    var materialMarmol = new THREE.MeshStandardMaterial({map:textura });
+    const materialDorado = new THREE.MeshStandardMaterial({
+      color: 0xffd700,       // Color dorado (hex)
+      metalness: 0.9,        // Máxima apariencia metálica
+      roughness: 0.2,        // Un poco rugoso para dar realismo
+    });
     
     //Creamos la base por revolución
     var shape_base = new THREE.Shape();
@@ -29,18 +37,19 @@ class Rey extends THREE.Object3D {
 
     var Geom_base = new THREE.LatheGeometry(puntos_base,24,0,Math.PI*2);
     Geom_base.translate(0,-0.52,0);
-    var base = new THREE.Mesh(Geom_base,this.Mat);
+    var base = new THREE.Mesh(Geom_base,materialMarmol);
 
     //Creamos el cuerpo
     var Geom_cuerpo = new THREE.CylinderGeometry(0.8,0.8,3,32,32);
     Geom_cuerpo.translate(0,3.34,0);
-    var cuerpo_brush = new CSG.Brush(Geom_cuerpo,this.Mat);
+    var cuerpo_brush = new CSG.Brush(Geom_cuerpo,materialMarmol);
 
     //Hacemos los huecos de la columna
     this.evaluador = new CSG.Evaluator();
     var huecos = this.generarHuecos(20,0.1,3);
 
     var cuerpo = this.evaluador.evaluate(cuerpo_brush,huecos,CSG.SUBTRACTION);
+    cuerpo.material = materialMarmol;
 
     //Hacemos la cabeza por revolución
     var shape_cabeza = new THREE.Shape();
@@ -67,7 +76,7 @@ class Rey extends THREE.Object3D {
     var Geom_cabeza = new THREE.LatheGeometry(puntos_cabeza,24,0,Math.PI*2);
     Geom_cabeza.scale(0.6,0.6,0.6);
     Geom_cabeza.translate(0,4.84,0);
-    var cabeza = new THREE.Mesh(Geom_cabeza,this.Mat);
+    var cabeza = new THREE.Mesh(Geom_cabeza,materialMarmol);
 
     /******************************Corona************************************ */
     
@@ -78,6 +87,7 @@ class Rey extends THREE.Object3D {
     var interiorBrush = new CSG.Brush(interiorGeo, this.Mat);
 
     var corona = this.evaluador.evaluate(coronaBrush, interiorBrush, CSG.SUBTRACTION);
+    corona.material = materialDorado;
 
     var cilindro1Geo = new THREE.CylinderGeometry(0.4, 0.4, 2);
     var cilindro2Geo = new THREE.CylinderGeometry(0.4, 0.4, 2);
@@ -105,6 +115,7 @@ class Rey extends THREE.Object3D {
     var tmp2 = this.evaluador.evaluate(tmp1, cilindro2Brush, CSG.SUBTRACTION);
     var tmp3 = this.evaluador.evaluate(tmp2, cilindro3Brush, CSG.SUBTRACTION);
     var tmp4 = this.evaluador.evaluate(tmp3, cilindro4Brush, CSG.SUBTRACTION);
+    tmp4.material = materialDorado;
 
     tmp4.position.y = 0.4;
 
@@ -151,7 +162,7 @@ class Rey extends THREE.Object3D {
     });
     
     var pathGeo = new THREE.CatmullRomCurve3(v3);
-    var optionsBarrido = { steps: 50, curveSegments: 6, extrudePath: pathGeo};
+    var optionsBarrido = { steps: 20, curveSegments: 6, extrudePath: pathGeo};
 
     for (let i = 0; i < 8; i++) {
       
@@ -160,7 +171,7 @@ class Rey extends THREE.Object3D {
       tuboGeo.translate(0.8, 0.4, 0);
       tuboGeo.rotateY(i*Math.PI/4);
 
-      var tuboMesh = new THREE.Mesh(tuboGeo, this.Mat);
+      var tuboMesh = new THREE.Mesh(tuboGeo, materialDorado);
       corona.add(tuboMesh);
         
     }
@@ -190,7 +201,7 @@ class Rey extends THREE.Object3D {
     var cruzGeo = new THREE.ExtrudeGeometry( shapeCruz, extrudeSettings );
     cruzGeo.scale(0.25, 0.25, 0.25);
     cruzGeo.translate(0,1.25, 0);
-    var cruzmesh = new THREE.Mesh(cruzGeo, this.Mat);
+    var cruzmesh = new THREE.Mesh(cruzGeo, materialDorado);
     corona.add(cruzmesh);
 
     corona.position.y = 6;
@@ -203,11 +214,11 @@ class Rey extends THREE.Object3D {
     espada.scale.set(1.5, 1.5, 1.5);
     espada.position.set(0, 4, 2);
 
-    var brazoIzquierdo = this.crearBrazo(false);
+    var brazoIzquierdo = this.crearBrazo(false, materialMarmol);
     brazoIzquierdo.scale.set(0.8, 0.8, 0.8);
     brazoIzquierdo.position.set(-1.1, 5.7, 0.3);
     
-    var brazoDerecho = this.crearBrazo(true);
+    var brazoDerecho = this.crearBrazo(true, materialMarmol);
     brazoDerecho.scale.set(0.8, 0.8, 0.8);
     brazoDerecho.position.set(1.1, 5.7, 0.3);
 
@@ -249,8 +260,8 @@ class Rey extends THREE.Object3D {
 
     const metalMaterial = new THREE.MeshStandardMaterial({
         color: 0x9c9c9c,      // color plateado claro
-        metalness: 0.5,       // completamente metálico
-        roughness: 0.45,      // muy pulido, casi como espejo
+        metalness: 0.8,       // completamente metálico
+        roughness: 0.2,      // muy pulido, casi como espejo
         envMapIntensity: 1.5,  // reflejos intensos si hay envMap
         flatShading: true
     });
@@ -308,7 +319,7 @@ class Rey extends THREE.Object3D {
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // negro
     const edgeLines = new THREE.LineSegments(edges, lineMaterial);
 
-    espada.add(edgeLines);
+    //espada.add(edgeLines);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // luz general
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -330,18 +341,18 @@ class Rey extends THREE.Object3D {
     
   }
 
-  crearBrazo(derecho){
+  crearBrazo(derecho, material){
     var brazo = new THREE.Object3D();
         var anteBrazo = new THREE.Object3D();
     
         var manoGeo = new THREE.SphereGeometry(0.4);
         manoGeo.translate(0, -2, 0);
-        var mano = new THREE.Mesh(manoGeo, this.Mat);
+        var mano = new THREE.Mesh(manoGeo, material);
         anteBrazo.add(mano);
     
         var anteBrazoGeo = new THREE.CylinderGeometry(0.3, 0.2, 2);
         anteBrazoGeo.translate(0, -1, 0);
-        var anteBrazoMesh = new THREE.Mesh(anteBrazoGeo, this.Mat);
+        var anteBrazoMesh = new THREE.Mesh(anteBrazoGeo, material);
         anteBrazo.add(anteBrazoMesh);
         anteBrazo.position.y = -2.4;
     
@@ -353,14 +364,14 @@ class Rey extends THREE.Object3D {
         var brazoGeo = new THREE.CylinderGeometry(0.35, 0.3, 2.3);
         brazoGeo.translate(0, -1.25, 0);
     
-        var hombro = new THREE.Mesh(hombroGeo, this.Mat);
+        var hombro = new THREE.Mesh(hombroGeo, material);
         brazo.add(hombro);
-        var brazoMesh = new THREE.Mesh(brazoGeo, this.Mat);
+        var brazoMesh = new THREE.Mesh(brazoGeo, material);
         brazo.add(brazoMesh);
     
         var codoGeo = new THREE.SphereGeometry(0.3);
         codoGeo.translate(0, -2.4, 0);
-        var codo = new THREE.Mesh(codoGeo, this.Mat);
+        var codo = new THREE.Mesh(codoGeo, material);
         brazo.add(codo);
         brazo.rotation.z = Math.pow(-1, derecho)*-Math.PI/13;
         brazo.rotation.x = -Math.PI/3;

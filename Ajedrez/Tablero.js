@@ -39,8 +39,10 @@ class Tablero extends THREE.Object3D {
         let torreBlanca1 = new torre(blanco, this.casillas[0][0]);
         this.casillas[0][0].setPieza(torreBlanca1);
         this.piezas_seleccionables_blancas.push(torreBlanca1.torre);
-        // this.casillas[0][0].setPieza(new torre(blanco));
-        // this.casillas[7][0].setPieza(new torre(blanco));
+
+        let torreBlanca2 = new torre(blanco, this.casillas[7][0]);
+        this.casillas[7][0].setPieza(torreBlanca2);
+        this.piezas_seleccionables_blancas.push(torreBlanca2.torre);
 
         let caballoBlanco1 = new caballo(blanco,this.casillas[1][0]);
         this.casillas[1][0].setPieza(caballoBlanco1);
@@ -50,20 +52,27 @@ class Tablero extends THREE.Object3D {
         this.casillas[6][0].setPieza(caballoBlanco2);
         this.piezas_seleccionables_blancas.push(caballoBlanco2.caballo);
 
-        // let alfilBlanco1 = new Alfil(blanco,this.casillas[2][0]);
-        // this.casillas[2][0].setPieza(alfilBlanco1);
-        // this.piezas_seleccionables_blancas.push(alfilBlanco1.alfil);
+        let alfilBlanco1 = new Alfil(blanco,this.casillas[2][0]);
+        this.casillas[2][0].setPieza(alfilBlanco1);
+        this.piezas_seleccionables_blancas.push(alfilBlanco1.alfil);
 
-        // let alfilBlanco2 = new Alfil(blanco,this.casillas[5][0]);
-        // this.casillas[5][0].setPieza(alfilBlanco2);
-        // this.piezas_seleccionables_blancas.push(alfilBlanco2.alfil);
+        let alfilBlanco2 = new Alfil(blanco,this.casillas[5][0]);
+        this.casillas[5][0].setPieza(alfilBlanco2);
+        this.piezas_seleccionables_blancas.push(alfilBlanco2.alfil);
 
 
-        // this.casillas[3][0].setPieza(new Rey(blanco));
-        // let reinaBlanca = new Reina(blanco,this.casillas[4][3]);
-        // this.casillas[4][3].setPieza(reinaBlanca);
-        // this.piezas_seleccionables_blancas.push(reinaBlanca.reina);
+         //this.casillas[3][0].setPieza(new Rey(blanco));
+         let reinaBlanca = new Reina(blanco,this.casillas[4][3]);
+         this.casillas[4][3].setPieza(reinaBlanca);
+         this.piezas_seleccionables_blancas.push(reinaBlanca.reina);
 
+        let torreLila1 = new torre(lila, this.casillas[0][7]);
+        this.casillas[0][7].setPieza(torreLila1);
+        this.piezas_seleccionables_lilas.push(torreLila1.torre);
+
+        let torreLila2 = new torre(lila, this.casillas[7][7]);
+        this.casillas[7][7].setPieza(torreLila2);
+        this.piezas_seleccionables_lilas.push(torreLila2.torre);
 
         // this.casillas[0][7].setPieza(new torre(lila));
         // this.casillas[7][7].setPieza(new torre(lila));
