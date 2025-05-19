@@ -36,6 +36,8 @@ class Tablero extends THREE.Object3D {
     }
 
     inicializarTablero() {
+
+        //Torres blancas
         let torreBlanca1 = new torre(blanco, this.casillas[0][0]);
         this.casillas[0][0].setPieza(torreBlanca1);
         this.piezas_seleccionables_blancas.push(torreBlanca1.torre);
@@ -44,6 +46,7 @@ class Tablero extends THREE.Object3D {
         this.casillas[7][0].setPieza(torreBlanca2);
         this.piezas_seleccionables_blancas.push(torreBlanca2.torre);
 
+        //Caballos blancos
         let caballoBlanco1 = new caballo(blanco,this.casillas[1][0]);
         this.casillas[1][0].setPieza(caballoBlanco1);
         this.piezas_seleccionables_blancas.push(caballoBlanco1.caballo);
@@ -52,6 +55,7 @@ class Tablero extends THREE.Object3D {
         this.casillas[6][0].setPieza(caballoBlanco2);
         this.piezas_seleccionables_blancas.push(caballoBlanco2.caballo);
 
+        //Alfiles blancos
         let alfilBlanco1 = new Alfil(blanco,this.casillas[2][0]);
         this.casillas[2][0].setPieza(alfilBlanco1);
         this.piezas_seleccionables_blancas.push(alfilBlanco1.alfil);
@@ -60,12 +64,17 @@ class Tablero extends THREE.Object3D {
         this.casillas[5][0].setPieza(alfilBlanco2);
         this.piezas_seleccionables_blancas.push(alfilBlanco2.alfil);
 
+        //Rey blanco
+        let reyBlanco = new Rey(blanco,this.casillas[3][0]);
+        this.casillas[3][0].setPieza(reyBlanco);
+        this.piezas_seleccionables_blancas.push(reyBlanco.rey);
 
-         //this.casillas[3][0].setPieza(new Rey(blanco));
-         let reinaBlanca = new Reina(blanco,this.casillas[4][3]);
-         this.casillas[4][3].setPieza(reinaBlanca);
-         this.piezas_seleccionables_blancas.push(reinaBlanca.reina);
+        //Reina blanca
+        let reinaBlanca = new Reina(blanco,this.casillas[4][0]);
+        this.casillas[4][0].setPieza(reinaBlanca);
+        this.piezas_seleccionables_blancas.push(reinaBlanca.reina);
 
+        //Torres lilas
         let torreLila1 = new torre(lila, this.casillas[0][7]);
         this.casillas[0][7].setPieza(torreLila1);
         this.piezas_seleccionables_lilas.push(torreLila1.torre);
@@ -74,9 +83,7 @@ class Tablero extends THREE.Object3D {
         this.casillas[7][7].setPieza(torreLila2);
         this.piezas_seleccionables_lilas.push(torreLila2.torre);
 
-        // this.casillas[0][7].setPieza(new torre(lila));
-        // this.casillas[7][7].setPieza(new torre(lila));
-
+        //Caballos lilas
         let caballoLila1 = new caballo(lila,this.casillas[1][7]);
         this.casillas[1][7].setPieza(caballoLila1);
         this.piezas_seleccionables_lilas.push(caballoLila1.caballo);
@@ -85,9 +92,7 @@ class Tablero extends THREE.Object3D {
         this.casillas[6][7].setPieza(caballoLila2);
         this.piezas_seleccionables_lilas.push(caballoLila2.caballo);
         
-        // this.casillas[1][7].setPieza(new caballo(lila));
-        // this.casillas[6][7].setPieza(new caballo(lila));
-
+        //Alfiles lilas
         let alfilLila1 = new Alfil(lila,this.casillas[2][7]);
         this.casillas[2][7].setPieza(alfilLila1);
         this.piezas_seleccionables_lilas.push(alfilLila1.alfil);
@@ -96,12 +101,13 @@ class Tablero extends THREE.Object3D {
         this.casillas[5][7].setPieza(alfilLila2);
         this.piezas_seleccionables_lilas.push(alfilLila2.alfil);
 
-        // this.casillas[2][7].setPieza(new Alfil(lila));
-        // this.casillas[5][7].setPieza(new Alfil(lila));
+        //Rey lila
+        let reyLila = new Rey(lila,this.casillas[3][7]);
+        this.casillas[3][7].setPieza(reyLila);
+        this.piezas_seleccionables_lilas.push(reyLila.rey);
 
-        // this.casillas[3][7].setPieza(new Rey(lila));
-        let reinaLila = new Reina(lila,this.casillas[4][5]);
-        this.casillas[4][5].setPieza(reinaLila);
+        let reinaLila = new Reina(lila,this.casillas[4][7]);
+        this.casillas[4][7].setPieza(reinaLila);
         this.piezas_seleccionables_lilas.push(reinaLila.reina);
 
         //Peones

@@ -20,7 +20,7 @@ class Pieza extends THREE.Object3D {
         throw new Error("Este método debe ser implementado por la subclase.");
     }
 
-    mover(casilla_seleccionada,tablero) {
+    mover(casilla_seleccionada,tablero,escena) {
         var destino = casilla_seleccionada.obtenerPosicionMundo(); 
         const posicionActual = this.getMesh().position;
         const parent = this.getMesh().parent;
@@ -57,6 +57,18 @@ class Pieza extends THREE.Object3D {
                 this.casilla.actualizarPieza(null);
                 casilla_seleccionada.actualizarPieza(this);
                 this.actualizarCasilla(casilla_seleccionada);
+
+                //Cambiamos el turno y la cámara
+                if(escena.turno == "lila") {
+                    console.log("Turno: blanco");
+                    escena.turno = "blanco";
+                    escena.cambiarCamara(escena.turno);
+                  }
+                  else {
+                    console.log("Turno: lila");
+                    escena.turno = "lila";
+                    escena.cambiarCamara(escena.turno);
+                  }
             })
             .start();
     }

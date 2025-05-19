@@ -1,18 +1,22 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from './Pieza.js';
-import { lila } from './Tablero.js';
+import { lila,verde } from './Tablero.js';
  
 class Rey extends Pieza {
-  constructor(color) { 
-    super(color);
-    
-    // Material
-    this.Mat = new THREE.MeshStandardMaterial({color: color});
+  constructor(color,casilla) { 
+    super(color,casilla);
 
+    // Material
+    this.Mat = new THREE.MeshStandardMaterial({color:this.color});
     var loader = new THREE.TextureLoader ( ) ;
     var textura = loader.load("../imgs/marmol-blanco.jpg");
-    var materialMarmol = new THREE.MeshStandardMaterial({map:textura, color:color });
+    var materialMarmol = new THREE.MeshStandardMaterial({map:textura,color:this.color });
+    const materialDorado = new THREE.MeshStandardMaterial({
+      color: 0xffd700,       // Color dorado (hex)
+      metalness: 0.9,        // Máxima apariencia metálica
+      roughness: 0.2,        // Un poco rugoso para dar realismo
+    });
     
     //Creamos la base por revolución
     var shape_base = new THREE.Shape();
@@ -31,18 +35,23 @@ class Rey extends Pieza {
 
     var Geom_base = new THREE.LatheGeometry(puntos_base,24,0,Math.PI*2);
     Geom_base.translate(0,-0.52,0);
-    var base = new THREE.Mesh(Geom_base, materialMarmol);
+
+    var base = new THREE.Mesh(Geom_base,materialMarmol);
+
 
     //Creamos el cuerpo
     var Geom_cuerpo = new THREE.CylinderGeometry(0.8,0.8,3,32,32);
     Geom_cuerpo.translate(0,3.34,0);
-    var cuerpo_brush = new CSG.Brush(Geom_cuerpo, materialMarmol);
+
+    var cuerpo_brush = new CSG.Brush(Geom_cuerpo,materialMarmol);
+
 
     //Hacemos los huecos de la columna
     this.evaluador = new CSG.Evaluator();
     var huecos = this.generarHuecos(20,0.1,3);
 
     var cuerpo = this.evaluador.evaluate(cuerpo_brush,huecos,CSG.SUBTRACTION);
+    cuerpo.material = materialMarmol;
 
     //Hacemos la cabeza por revolución
     var shape_cabeza = new THREE.Shape();
@@ -60,16 +69,14 @@ class Rey extends Pieza {
     shape_cabeza.lineTo(1.77,1.31);
     shape_cabeza.bezierCurveTo(1.9,1.3,1.94,1.58,1.79,1.59);
     shape_cabeza.lineTo(0,1.59);
-    // shape_cabeza.quadraticCurveTo(1.76,2.14,2.05,2.51);
-    // shape_cabeza.bezierCurveTo(2.18,2.53,2.16,2.82,2,2.8);
-    // shape_cabeza.lineTo(0,2.8);
 
     var puntos_cabeza = shape_cabeza.extractPoints(30).shape;
 
     var Geom_cabeza = new THREE.LatheGeometry(puntos_cabeza,24,0,Math.PI*2);
     Geom_cabeza.scale(0.6,0.6,0.6);
     Geom_cabeza.translate(0,4.84,0);
-    var cabeza = new THREE.Mesh(Geom_cabeza, materialMarmol);
+
+    var cabeza = new THREE.Mesh(Geom_cabeza,materialMarmol);
 
     /******************************Corona************************************ */
     
@@ -80,6 +87,7 @@ class Rey extends Pieza {
     var interiorBrush = new CSG.Brush(interiorGeo, this.Mat);
 
     var corona = this.evaluador.evaluate(coronaBrush, interiorBrush, CSG.SUBTRACTION);
+    corona.material = materialDorado;
 
     var cilindro1Geo = new THREE.CylinderGeometry(0.4, 0.4, 2);
     var cilindro2Geo = new THREE.CylinderGeometry(0.4, 0.4, 2);
@@ -107,6 +115,7 @@ class Rey extends Pieza {
     var tmp2 = this.evaluador.evaluate(tmp1, cilindro2Brush, CSG.SUBTRACTION);
     var tmp3 = this.evaluador.evaluate(tmp2, cilindro3Brush, CSG.SUBTRACTION);
     var tmp4 = this.evaluador.evaluate(tmp3, cilindro4Brush, CSG.SUBTRACTION);
+    tmp4.material = materialDorado;
 
     tmp4.position.y = 0.4;
 
@@ -162,7 +171,7 @@ class Rey extends Pieza {
       tuboGeo.translate(0.8, 0.4, 0);
       tuboGeo.rotateY(i*Math.PI/4);
 
-      var tuboMesh = new THREE.Mesh(tuboGeo, this.Mat);
+      var tuboMesh = new THREE.Mesh(tuboGeo, materialDorado);
       corona.add(tuboMesh);
         
     }
@@ -192,7 +201,7 @@ class Rey extends Pieza {
     var cruzGeo = new THREE.ExtrudeGeometry( shapeCruz, extrudeSettings );
     cruzGeo.scale(0.25, 0.25, 0.25);
     cruzGeo.translate(0,1.25, 0);
-    var cruzmesh = new THREE.Mesh(cruzGeo, this.Mat);
+    var cruzmesh = new THREE.Mesh(cruzGeo, materialDorado);
     corona.add(cruzmesh);
 
     corona.position.y = 6;
@@ -214,21 +223,43 @@ class Rey extends Pieza {
     brazoDerecho.position.set(1.1, 5.7, 0.3);
 
 
-    var rey = new THREE.Object3D();
-    rey.add(base);
-    rey.add(cuerpo);
-    rey.add(cabeza);
-    rey.add(corona);
-    rey.add(espada);
-    rey.add(brazoIzquierdo);
-    rey.add(brazoDerecho);
+    this.rey = new THREE.Object3D();
+    this.rey.add(base);
+    this.rey.add(cuerpo);
+    this.rey.add(cabeza);
+    this.rey.add(corona);
+    this.rey.add(espada);
+    this.rey.add(brazoIzquierdo);
+    this.rey.add(brazoDerecho);
 
-    rey.scale.set(0.25,0.25,0.25);
+    this.rey.scale.set(0.25,0.25,0.25);
     if(color == lila) {
-      rey.rotateY(Math.PI);
+      this.rey.rotateY(Math.PI);
     }
-    this.add(rey);
 
+    this.rey.userData.refPieza = this;
+    this.add(this.rey);
+
+  }
+
+  getMesh() {
+    return this.rey;
+  }
+
+  onClick(tablero) {
+    this.seleccionada = !this.seleccionada;
+    let casillas_validas = this.movimientoPosibles(tablero);
+
+    casillas_validas.forEach(casilla_valida => {
+      if(this.seleccionada) {
+        casilla_valida.setColor(verde);
+      }
+      else {
+        casilla_valida.setColor(casilla_valida.colorInicial);
+      }
+    }) 
+
+    return casillas_validas;
   }
 
   generarHuecos(num_huecos,radio,altura) {
@@ -255,7 +286,7 @@ class Rey extends Pieza {
 
     const metalMaterial = new THREE.MeshStandardMaterial({
         color: 0x9c9c9c,      // color plateado claro
-        metalness: 0.9,       // completamente metálico
+        metalness: 0.8,       // completamente metálico
         roughness: 0.2,      // muy pulido, casi como espejo
         envMapIntensity: 1.5,  // reflejos intensos si hay envMap
         flatShading: true
@@ -314,7 +345,7 @@ class Rey extends Pieza {
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // negro
     const edgeLines = new THREE.LineSegments(edges, lineMaterial);
 
-    espada.add(edgeLines);
+    //espada.add(edgeLines);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // luz general
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -347,7 +378,7 @@ class Rey extends Pieza {
     
         var anteBrazoGeo = new THREE.CylinderGeometry(0.3, 0.2, 2);
         anteBrazoGeo.translate(0, -1, 0);
-        var anteBrazoMesh = new THREE.Mesh(anteBrazoGeo, this.Mat);
+        var anteBrazoMesh = new THREE.Mesh(anteBrazoGeo, material);
         anteBrazo.add(anteBrazoMesh);
         anteBrazo.position.y = -2.4;
     
@@ -373,6 +404,70 @@ class Rey extends Pieza {
     
         brazo.add(anteBrazo);
         return (brazo);
+  }
+  
+  movimientoPosibles(tablero) {
+
+    let casillas_validas = [];
+    let casilla_actual;
+    let i=this.casilla.posX;
+    let j=this.casilla.posY;
+
+    if(j>0) {
+      if(i>0) {
+        casilla_actual = tablero[i-1][j-1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      if(i<7) {
+        casilla_actual = tablero[i+1][j-1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      
+      casilla_actual = tablero[i][j-1];
+      if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+
+    if(j<7) {
+      if(i>0) {
+        casilla_actual = tablero[i-1][j+1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      if(i<7) {
+        casilla_actual = tablero[i+1][j+1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      
+      casilla_actual = tablero[i][j+1];
+      if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+
+    if(i>0) {
+      casilla_actual = tablero[i-1][j];
+      if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+    if(i<7) {
+      casilla_actual = tablero[i+1][j];
+      if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+    
+    return casillas_validas;
+
   }
 }
 
