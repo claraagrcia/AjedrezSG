@@ -64,7 +64,7 @@ class MyScene extends THREE.Scene {
     window.addEventListener('click', (event) => this.onClick(event));
   }
 
-   onClick(event) {
+  onClick(event) {
      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
      this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
 

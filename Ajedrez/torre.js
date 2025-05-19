@@ -1,73 +1,77 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from '../Ajedrez/Pieza.js';
+import { verde } from './Tablero.js';
  
 class torre extends Pieza{
-  constructor(color) {
-    super(color);
+  constructor(color,casilla) {
+    super(color,casilla);
     
     //Crear  la forma
-
-    var torre = new THREE.Object3D();
+    var contenedor = new THREE.Object3D();
+    this.torre = new THREE.Object3D();
     var y = 0; 
     var angle = Math.PI/2;
 
     //Bloque con 3 filas
-    let result = this.createBlock(torre, 3, y, angle);
+    let result = this.createBlock(contenedor, 3, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la izquierda
-    result = this.createMiddleHole(torre, y, angle);
+    result = this.createMiddleHole(contenedor, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 1 filas
-    result = this.createBlock(torre, 1, y, angle);
+    result = this.createBlock(contenedor, 1, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la derecha
-    result = this.createRightRow(torre, y, angle);
+    result = this.createRightRow(contenedor, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 2 filas
-    result = this.createBlock(torre, 2, y, angle);
+    result = this.createBlock(contenedor, 2, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la izquierda
-    result = this.createLeftRow(torre, y, angle);
+    result = this.createLeftRow(contenedor, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Fila con un bloque menos a la izquierda
-    result = this.createLeftRow(torre, y, angle);
+    result = this.createLeftRow(contenedor, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 2 filas
-    result = this.createBlock(torre, 2, y, angle);
+    result = this.createBlock(contenedor, 2, y, angle);
     y = result.y;
     angle = result.angle;
     
     //Fila con un bloque menos en medio
-    result = this.createMiddleHole(torre, y, angle);
+    result = this.createMiddleHole(contenedor, y, angle);
     y = result.y;
     angle = result.angle;
 
     //Bloque con 2 filas
-    result = this.createBlock(torre, 2, y, angle);
+    result = this.createBlock(contenedor, 2, y, angle);
     y = result.y;
     angle = result.angle;
 
-    this.createDeco(torre);
+    this.createDeco(contenedor);
 
-    torre.scale.set(0.3,0.3,0.3);
-    torre.translateX(-0.23);
-    torre.translateY(0.16);
-    this.add(torre);
+    contenedor.position.x = -0.77;
+    contenedor.position.y = 0.53;
+    this.torre.scale.set(0.3,0.3,0.3);
+    this.torre.add(contenedor);
+
+    this.torre.userData.refPieza = this;
+    this.add(this.torre);
 
   }
   /**
@@ -118,7 +122,7 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en el que se colocarán los cubos
    * @returns un array con la nueva altura (y) y el nuevo ángulo (angle)
    */
-  createBlock(torre, nRows, y, angle){
+  createBlock(contenedor, nRows, y, angle){
    
     var unCubo;
 
@@ -145,7 +149,7 @@ class torre extends Pieza{
         //Se rota y traslada a la altura correcta
         unCubo.position.y = y;
         unCubo.rotation.y = angle;
-        torre.add(unCubo);
+        contenedor.add(unCubo);
 
       }
 
@@ -165,7 +169,7 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en la que esta fila estará orientada
    * @returns un array con la altura y el ángulo actualizados
    */
-  createRightRow(torre, y, angle){
+  createRightRow(contenedor, y, angle){
     
     var unCubo;
     for(var i = 0; i < 2; ++i ){
@@ -185,7 +189,7 @@ class torre extends Pieza{
       
       unCubo.position.y = y;
       unCubo.rotation.y = angle;
-      torre.add(unCubo);
+      contenedor.add(unCubo);
 
     }
     y += 0.6;
@@ -201,7 +205,7 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en la que esta fila estará orientada
    * @returns un array con la altura y el ángulo actualizados
    */
-  createLeftRow(torre, y, angle){
+  createLeftRow(contenedor, y, angle){
     
     var unCubo;
     for(var i = 1; i <= 2; ++i ){
@@ -221,7 +225,7 @@ class torre extends Pieza{
       
       unCubo.position.y = y;
       unCubo.rotation.y = angle;
-      torre.add(unCubo);
+      contenedor.add(unCubo);
 
     }
     y += 0.6;
@@ -237,7 +241,7 @@ class torre extends Pieza{
    * @param {*} angle el ángulo en la que esta fila estará orientada
    * @returns un array con la altura y el ángulo actualizados
    */
-  createMiddleHole(torre, y, angle){
+  createMiddleHole(contenedor, y, angle){
     
     var unCubo = this.createCubo();
 
@@ -254,7 +258,7 @@ class torre extends Pieza{
     
     unCubo.position.y = y;
     unCubo.rotation.y = angle;
-    torre.add(unCubo);
+    contenedor.add(unCubo);
 
     var unCubo = this.createCubo();
 
@@ -271,7 +275,7 @@ class torre extends Pieza{
     
     unCubo.position.y = y;
     unCubo.rotation.y = angle;
-    torre.add(unCubo);
+    contenedor.add(unCubo);
     
     y += 0.6;
     angle += Math.PI/2;
@@ -283,7 +287,7 @@ class torre extends Pieza{
    * @brief crea la decoración de la cima de la torre, en este caso una bandera
    * @param {*} torre la torre que se esta construyendo
    */
-  createDeco(torre){
+  createDeco(contenedor){
 
     var material = new THREE.MeshNormalMaterial();
     var esferaGeo = new THREE.SphereGeometry(0.1);
@@ -338,74 +342,105 @@ class torre extends Pieza{
     result.position.x = 0.7;
 
     //Se la añadimos a la torre
-    torre.add(result);
+    contenedor.add(result);
 
   }
+
+  getMesh() {
+    return this.torre;
+  }
+
+  onClick(tablero) {
+      this.seleccionada = !this.seleccionada;
+      let casillas_validas = this.movimientoPosibles(tablero);
   
-  createGUI (gui,titleGui) {
-    // Controles para el tamaño, la orientación y la posición de la caja
-    this.guiControls = {
-      sizeX : 1.0,
-      sizeY : 1.0,
-      sizeZ : 1.0,
-      
-      rotX : 0.0,
-      rotY : 0.0,
-      rotZ : 0.0,
-      
-      posX : 0.0,
-      posY : 0.0,
-      posZ : 0.0,
-      
-      // Un botón para dejarlo todo en su posición inicial
-      // Cuando se pulse se ejecutará esta función.
-      reset : () => {
-        this.guiControls.sizeX = 1.0;
-        this.guiControls.sizeY = 1.0;
-        this.guiControls.sizeZ = 1.0;
-        
-        this.guiControls.rotX = 0.0;
-        this.guiControls.rotY = 0.0;
-        this.guiControls.rotZ = 0.0;
-        
-        this.guiControls.posX = 0.0;
-        this.guiControls.posY = 0.0;
-        this.guiControls.posZ = 0.0;
+      casillas_validas.forEach(casilla_valida => {
+        if(this.seleccionada) {
+          casilla_valida.setColor(verde);
+        }
+        else {
+          casilla_valida.setColor(casilla_valida.colorInicial);
+        }
+      }) 
+  
+      return casillas_validas;
+    }
+    
+    movimientoPosibles(tablero) {
+  
+      let casillas_validas = [];
+      let casilla_actual;
+      let i=this.casilla.posX;
+      let j=this.casilla.posY;
+    
+      //Arriba
+      while (j>0) {
+        j--;
+        casilla_actual = tablero[i][j];
+
+        if(casilla_actual.pieza!=null) {
+          j=0;
+          if(casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }
+        }
+        else {
+          casillas_validas.push(casilla_actual);
+        }
       }
-    } 
+
+      //Abajo
+      j=this.casilla.posY;
+      while (j<7) {
+        j++;
+        casilla_actual = tablero[i][j];
+        if(casilla_actual.pieza!=null) {
+          j=7;
+          if(casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }
+        }
+        else {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+
+      //Derecha
+      j=this.casilla.posY;
+      while(i<7) {
+        i++;
+        casilla_actual = tablero[i][j];
+        if(casilla_actual.pieza!=null) {
+          i=7;
+          if(casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }
+        }
+        else {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+
+      //Izquierda
+      i=this.casilla.posX;
+      while (i>0) {
+        i--;
+        casilla_actual = tablero[i][j];
+        if(casilla_actual.pieza!=null) {
+          i=0;
+          if(casilla_actual.pieza.color != this.color) {
+            casillas_validas.push(casilla_actual);
+          }
+        }
+        else {
+          casillas_validas.push(casilla_actual);
+        }
+      }
     
-    // Se crea una sección para los controles de la caja
-    var folder = gui.addFolder (titleGui);
-    // Estas lineas son las que añaden los componentes de la interfaz
-    // Las tres cifras indican un valor mínimo, un máximo y el incremento
-    // El método   listen()   permite que si se cambia el valor de la variable en código, el deslizador de la interfaz se actualice
-    folder.add (this.guiControls, 'sizeX', 0.1, 5.0, 0.01).name ('Tamaño X : ').listen();
-    folder.add (this.guiControls, 'sizeY', 0.1, 5.0, 0.01).name ('Tamaño Y : ').listen();
-    folder.add (this.guiControls, 'sizeZ', 0.1, 5.0, 0.01).name ('Tamaño Z : ').listen();
-    
-    folder.add (this.guiControls, 'rotX', 0.0, Math.PI/2, 0.01).name ('Rotación X : ').listen();
-    folder.add (this.guiControls, 'rotY', 0.0, Math.PI/2, 0.01).name ('Rotación Y : ').listen();
-    folder.add (this.guiControls, 'rotZ', 0.0, Math.PI/2, 0.01).name ('Rotación Z : ').listen();
-    
-    folder.add (this.guiControls, 'posX', -20.0, 20.0, 0.01).name ('Posición X : ').listen();
-    folder.add (this.guiControls, 'posY', 0.0, 10.0, 0.01).name ('Posición Y : ').listen();
-    folder.add (this.guiControls, 'posZ', -20.0, 20.0, 0.01).name ('Posición Z : ').listen();
-    
-    folder.add (this.guiControls, 'reset').name ('[ Reset ]');
-  }
+      return casillas_validas;
   
-  update () {
-    // Con independencia de cómo se escriban las 3 siguientes líneas, el orden en el que se aplican las transformaciones es:
-    // Primero, el escalado
-    // Segundo, la rotación en Z
-    // Después, la rotación en Y
-    // Luego, la rotación en X
-    // Y por último la traslación
-   
-    this.position.set (this.guiControls.posX,this.guiControls.posY,this.guiControls.posZ);
-    this.rotation.set (this.guiControls.rotX,this.guiControls.rotY,this.guiControls.rotZ);
-    this.scale.set (this.guiControls.sizeX,this.guiControls.sizeY,this.guiControls.sizeZ);
-  }
+    }
+  
 }
 
 export { torre };

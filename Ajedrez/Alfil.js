@@ -66,7 +66,7 @@ class Alfil extends Pieza {
     shape_cabeza.quadraticCurveTo(2,0,2,0.5);
     shape_cabeza.quadraticCurveTo(2,1,1.5,0.9);
     shape_cabeza.quadraticCurveTo(1.6,1.2,1.45,1.4);
-      shape_cabeza.quadraticCurveTo(1.3,1.6,1.1,1.7);
+    shape_cabeza.quadraticCurveTo(1.3,1.6,1.1,1.7);
     shape_cabeza.quadraticCurveTo(1.4,1.8,1.7,2);
     shape_cabeza.quadraticCurveTo(1.9,2.3,2,2.7);
     shape_cabeza.quadraticCurveTo(1.7,4.7,0,6);

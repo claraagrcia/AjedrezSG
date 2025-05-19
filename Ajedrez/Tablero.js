@@ -36,6 +36,9 @@ class Tablero extends THREE.Object3D {
     }
 
     inicializarTablero() {
+        let torreBlanca1 = new torre(blanco, this.casillas[0][0]);
+        this.casillas[0][0].setPieza(torreBlanca1);
+        this.piezas_seleccionables_blancas.push(torreBlanca1.torre);
         // this.casillas[0][0].setPieza(new torre(blanco));
         // this.casillas[7][0].setPieza(new torre(blanco));
 
