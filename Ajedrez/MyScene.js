@@ -30,13 +30,11 @@ class MyScene extends THREE.Scene {
     this.initStats();
     
     // Construimos los distinos elementos que tendremos en la escena
+    this.createCamera();
     
     // Todo elemento que se desee sea tenido en cuenta en el renderizado de la escena debe pertenecer a esta. Bien como hijo de la escena (this en esta clase) o como hijo de un elemento que ya esté en la escena.
     // Tras crear cada elemento se añadirá a la escena con   this.add(variable)
     this.createLights ();
-    
-    // Tendremos una cámara con un control de movimiento con el ratón
-    this.createCamera ();
     
     // Un suelo 
     this.createGround ();
@@ -59,7 +57,13 @@ class MyScene extends THREE.Scene {
     this.casillas_validas = null;
     this.casilla_seleccionada = null;
     this.estado = 0; //esperando pieza
-    this.turno = "lila";
+    this.turno = "blanco";
+
+    this.camara = new THREE.Object3D();
+    this.camara.add(this.getCamera());
+    this.add(this.camara);
+    this.cambiarCamara(this.turno);
+    
 
     window.addEventListener('click', (event) => this.onClick(event));
   }
@@ -111,7 +115,7 @@ class MyScene extends THREE.Scene {
         this.casilla_seleccionada = pickedCasillas[0].object.userData;
 
          // Movemos la pieza a la casilla seleccionada
-          this.piezaSeleccionada.mover(this.casilla_seleccionada,this.model);
+          this.piezaSeleccionada.mover(this.casilla_seleccionada,this.model,this);
 
           //Limpiamos las casillas válidas
           this.piezaSeleccionada.seleccionada = !this.piezaSeleccionada.seleccionada;
@@ -121,12 +125,16 @@ class MyScene extends THREE.Scene {
           
           this.estado = 0;
 
-          if(this.turno == "lila") {
-            this.turno = "blanco";
-          }
-          else {
-            this.turno = "lila";
-          }
+          // if(this.turno == "lila") {
+          //   console.log("Turno: blanco");
+          //   this.turno = "blanco";
+          //   this.cambiarCamara(this.turno);
+          // }
+          // else {
+          //   console.log("Turno: lila");
+          //   this.turno = "lila";
+          //   this.cambiarCamara(this.turno);
+          // }
     
           // Limpiar los atributos correspondientes
           this.piezaSeleccionada = null;
@@ -161,22 +169,45 @@ class MyScene extends THREE.Scene {
     //   La razón de aspecto ancho/alto
     //   Los planos de recorte cercano y lejano
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
-    // Recuerda: Todas las unidades están en metros
-    // También se indica dónde se coloca
-    this.camera.position.set (4, 2, 4);
-    // Y hacia dónde mira
-    var look = new THREE.Vector3 (0,0,0);
-    this.camera.lookAt(look);
-    this.add (this.camera);
+      // Recuerda: Todas las unidades están en metros
+      // También se indica dónde se coloca
+      this.camera.position.set (7, 4, 7);
+      // Y hacia dónde mira
+      var look = new THREE.Vector3 (0,0,0);
+      this.camera.lookAt(look);
     
-    // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
-    this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
-    // Se configuran las velocidades de los movimientos
-    this.cameraControl.rotateSpeed = 5;
-    this.cameraControl.zoomSpeed = -2;
-    this.cameraControl.panSpeed = 0.5;
-    // Debe orbitar con respecto al punto de mira de la cámara
-    this.cameraControl.target = look;
+    // // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
+    // this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
+    // // Se configuran las velocidades de los movimientos
+    // this.cameraControl.rotateSpeed = 5;
+    // this.cameraControl.zoomSpeed = -2;
+    // this.cameraControl.panSpeed = 0.5;
+    // // Debe orbitar con respecto al punto de mira de la cámara
+    // this.cameraControl.target = look;
+  }
+
+  cambiarCamara(turno) {
+  
+    let angulo = 0;
+
+    if(turno == "lila") {
+      angulo = -Math.PI/4;
+    }
+    else if(turno == "blanco") {
+      angulo = 3*Math.PI/4;
+    }
+
+    // Guardar el valor actual de rotación
+    const actual = { y: this.camara.rotation.y };
+
+    // Tween sobre objeto plano
+    new TWEEN.Tween(actual)
+      .to({ y: angulo }, 1000)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate(() => {
+        this.camara.rotation.y = actual.y;
+      })
+      .start();
   }
   
   createGround () {
@@ -314,7 +345,7 @@ class MyScene extends THREE.Scene {
     // Se actualizan los elementos de la escena para cada frame
     
     // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update();
+    //this.cameraControl.update();
     
     // Se actualiza el resto del modelo
     this.model.update();
