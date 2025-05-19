@@ -23,14 +23,14 @@ class Reina extends Pieza {
     shape_base.bezierCurveTo(1.04,2.12,1.01,2.38,0.88,2.36);
     shape_base.lineTo(0,2.36);
 
-    var puntos_base = shape_base.extractPoints(20).shape;
+    var puntos_base = shape_base.extractPoints(10).shape;
 
     var Geom_base = new THREE.LatheGeometry(puntos_base,24,0,Math.PI*2);
     Geom_base.translate(0,-0.52,0);
     var base = new THREE.Mesh(Geom_base,this.Mat);
 
     //Creamos el cuerpo
-    var Geom_cuerpo = new THREE.CylinderGeometry(0.8,0.8,3,32,32);
+    var Geom_cuerpo = new THREE.CylinderGeometry(0.8,0.8,3,10,10);
     Geom_cuerpo.translate(0,3.34,0);
     var cuerpo_brush = new CSG.Brush(Geom_cuerpo,this.Mat);
 
@@ -48,7 +48,7 @@ class Reina extends Pieza {
     shape_base_capitel.lineTo(2.01,1.09);
     shape_base_capitel.lineTo(0,1.09);
 
-    var puntos_base_capitel = shape_base_capitel.extractPoints(30).shape;
+    var puntos_base_capitel = shape_base_capitel.extractPoints(10).shape;
 
     var Geom_base_capitel = new THREE.LatheGeometry(puntos_base_capitel,24,0,Math.PI*2);
     Geom_base_capitel.scale(0.5,0.5,0.5);
@@ -81,7 +81,7 @@ class Reina extends Pieza {
     espiral2.rotateY(Math.PI);
     espiral2.position.set(0,0,1.5);
 
-    var geom_cilindro = new THREE.CylinderGeometry(0.04,0.04,2.5,32,32);
+    var geom_cilindro = new THREE.CylinderGeometry(0.04,0.04,2.5,10,10);
     geom_cilindro.rotateZ(Math.PI/2);
     geom_cilindro.translate(0,6.05,0.75);
     var cilindro = new THREE.Mesh(geom_cilindro,this.Mat);
@@ -97,11 +97,11 @@ class Reina extends Pieza {
     //Corona
     var corona = new THREE.Object3D();
 
-    var geom_cilindro_corona = new THREE.CylinderGeometry(1.1,1.1,0.4,32,32);
+    var geom_cilindro_corona = new THREE.CylinderGeometry(1.1,1.1,0.4,10,10);
     geom_cilindro_corona.translate(0,6.8,0);
     var cilindro_corona_mesh = new THREE.Mesh(geom_cilindro_corona,this.Mat);
 
-    var geom_toro_corona = new THREE.TorusGeometry(1.1,0.1,32);
+    var geom_toro_corona = new THREE.TorusGeometry(1.1,0.1,10);
     geom_toro_corona.rotateX(Math.PI/2);
     geom_toro_corona.translate(0,7,0);
     var toro_corona_mesh = new THREE.Mesh(geom_toro_corona,this.Mat);
@@ -132,15 +132,15 @@ class Reina extends Pieza {
     //Lanza
     var lanza = new THREE.Object3D();
 
-    var geom_palo = new THREE.CylinderGeometry(0.1,0.1,6,32,32);
+    var geom_palo = new THREE.CylinderGeometry(0.1,0.1,6,10,10);
     geom_palo.translate(0,3.125,0);
     var palo_mesh = new THREE.Mesh(geom_palo,this.Mat);
 
-    var geom_bolita = new THREE.SphereGeometry(0.15);
+    var geom_bolita = new THREE.SphereGeometry(0.15,10);
     geom_bolita.translate(0,0.075,0);
     var bolita_mesh = new THREE.Mesh(geom_bolita,this.Mat);
 
-    var geom_adorno = new THREE.TorusGeometry(0.1,0.05,32);
+    var geom_adorno = new THREE.TorusGeometry(0.1,0.05,10);
     geom_adorno.rotateX(Math.PI/2);
     geom_adorno.translate(0,0.125,0);
     var adorno_mesh1 = new THREE.Mesh(geom_adorno,this.Mat);

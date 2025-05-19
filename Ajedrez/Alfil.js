@@ -71,14 +71,14 @@ class Alfil extends Pieza {
     shape_cabeza.quadraticCurveTo(1.9,2.3,2,2.7);
     shape_cabeza.quadraticCurveTo(1.7,4.7,0,6);
 
-    var puntos = shape_cabeza.extractPoints(20).shape;
+    var puntos = shape_cabeza.extractPoints(5).shape;
 
     var Geom_cabeza = new THREE.LatheGeometry(puntos,24,0,Math.PI*2);
     Geom_cabeza.translate(0,8,0.25);
     var brush_cabeza = new CSG.Brush(Geom_cabeza,Mat);
 
     // Bola superior de la cabeza
-    var bola_cabeza = new THREE.SphereGeometry(0.5,32,32);
+    var bola_cabeza = new THREE.SphereGeometry(0.5,10,10);
     bola_cabeza.scale(1,0.7,1);
     bola_cabeza.translate(0,14,0.25);
     var mesh_bola_cabeza = new THREE.Mesh(bola_cabeza,Mat);
@@ -117,22 +117,24 @@ class Alfil extends Pieza {
     shape_base.quadraticCurveTo(1.3,1.6,1.1,1.7);
     shape_base.lineTo(0,1.7);
 
-    var puntos_base = shape_base.extractPoints(20).shape;
+    var puntos_base = shape_base.extractPoints(5).shape;
 
     var Geom_base = new THREE.LatheGeometry(puntos_base,24,0,Math.PI*2);
     Geom_base.scale(2,1,2);
     Geom_base.translate(0,-1.1,0);
     var mesh_base = new THREE.Mesh(Geom_base,Mat);
     
-    
-    this.alfil = new THREE.Object3D();
-    this.alfil.add(cuerpo);
-    this.alfil.add(cabeza);
-    this.alfil.add(mesh_bola_cabeza);
-    this.alfil.add(mesh_base);
+    let contenedor = new THREE.Object3D(); 
+    contenedor.add(cuerpo);
+    contenedor.add(cabeza);
+    contenedor.add(mesh_bola_cabeza);
+    contenedor.add(mesh_base);
 
+    contenedor.position.y = 1.1;
+
+    this.alfil = new THREE.Object3D();
+    this.alfil.add(contenedor);
     this.alfil.scale.set(0.1, 0.1, 0.1);
-    this.alfil.translateY(0.11);
 
     this.alfil.userData.refPieza = this;
     this.add(this.alfil);

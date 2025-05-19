@@ -3,15 +3,15 @@ import * as CSG from '../libs/three-bvh-csg.js'
 import { MTLLoader } from '../libs/MTLLoader.js'
 import { OBJLoader } from '../libs/OBJLoader.js'
 import { Pieza } from './Pieza.js' 
-import {lila} from './Tablero.js'
+import {lila,verde} from './Tablero.js'
 
 class caballo extends Pieza {
-  constructor(color) {
-    super(color);
+  constructor(color,casilla) {
+    super(color,casilla);
     
 
     //Creamos un objeto 3d caballo
-    var caballo = new THREE.Object3D();
+    let contenedor = new THREE.Object3D();
     
     //*********************caballo********************** */
 
@@ -27,7 +27,7 @@ class caballo extends Pieza {
           child.material = new THREE.MeshStandardMaterial({color: color});
         }
       });
-      caballo.add ( object ) ;
+      contenedor.add ( object ) ;
     } , null , null ) ;
 
     //*******************Base*********************** */
@@ -37,20 +37,20 @@ class caballo extends Pieza {
 
     var material = new THREE.MeshStandardMaterial({color: color});
 
-    var toro1 = new THREE.TorusGeometry(0.8, 0.6);
+    var toro1 = new THREE.TorusGeometry(0.8, 0.6,20,20);
     toro1.rotateX (Math.PI/2);
     toro1.rotateZ (Math.PI/10);
     var toroMesh1 = new THREE.Mesh(toro1, material);
     caracola.add(toroMesh1);
 
-    var toro2 = new THREE.TorusGeometry(0.6, 0.4);
+    var toro2 = new THREE.TorusGeometry(0.6, 0.4,20,20);
     toro2.rotateX (Math.PI/2);
     toro2.rotateZ (Math.PI/10);
     toro2.translate(0, 0.7, 0);
     var toroMesh2 = new THREE.Mesh(toro2, material);
     caracola.add(toroMesh2);
 
-    var toro3 = new THREE.TorusGeometry(0.4, 0.2);
+    var toro3 = new THREE.TorusGeometry(0.4, 0.2,20,20);
     toro3.rotateX (Math.PI/2);
     toro3.rotateZ (Math.PI/10);
     toro3.translate(0, 1.2, 0);
@@ -59,10 +59,10 @@ class caballo extends Pieza {
 
     caracola.scale.set(0.5, 0.5, 0.5);
     
-    caballo.add(caracola);
+    contenedor.add(caracola);
 
     // Agregar burbujas
-    var bubbleGeometry = new THREE.SphereGeometry(0.1);
+    var bubbleGeometry = new THREE.SphereGeometry(0.1,10);
     const bubbleMaterial = new THREE.MeshStandardMaterial({
       color: 0x87cefa, // azul clarito
       transparent: true,
@@ -73,35 +73,149 @@ class caballo extends Pieza {
 
     var bubble = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
     bubble.position.set(0.3, 0.45, 0.4);
-    caballo.add(bubble);
+    contenedor.add(bubble);
 
     var bubble2 = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
     bubble2.position.set(-0.2, 0.55, 0.3);
-    caballo.add(bubble2);
+    contenedor.add(bubble2);
     
-    var bigBubbleGeometry = new THREE.SphereGeometry(0.2);
+    var bigBubbleGeometry = new THREE.SphereGeometry(0.2,10);
     var bigBubble = new THREE.Mesh(bigBubbleGeometry, bubbleMaterial);
     bigBubble.position.set(0.7, 0, -0.3);
-    caballo.add(bigBubble);
+    contenedor.add(bigBubble);
 
     var bigBubble2 = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
     bigBubble2.position.set(0.5, -0.1, -0.5);
-    caballo.add(bigBubble2);
+    contenedor.add(bigBubble2);
 
-    var soporte = new THREE.CylinderGeometry(1, 1, 0.3);
+    var soporte = new THREE.CylinderGeometry(1, 1, 0.3,20,20);
     soporte.translate(0, -0.3, 0);
     var soporteMesh = new THREE.Mesh(soporte, material);
-    caballo.add(soporteMesh);
+    contenedor.add(soporteMesh);
     
-    caballo.scale.set(0.4,0.4,0.4);
-    caballo.translateY(0.18);
+    contenedor.position.y = 0.45;
+
+    this.caballo = new THREE.Object3D();
+    this.caballo.add(contenedor);
+    this.caballo.scale.set(0.4,0.4,0.4);
+  
     
     if(color == lila) {
-      caballo.rotateY(Math.PI);
+      this.caballo.rotateY(Math.PI);
     }
 
-    this.add(caballo);
+    this.caballo.userData.refPieza = this;
+    this.add(this.caballo);
 
+  }
+
+  getMesh() {
+    return this.caballo;
+  }
+
+  onClick(tablero) {
+    this.seleccionada = !this.seleccionada;
+    let casillas_validas = this.movimientoPosibles(tablero);
+
+    casillas_validas.forEach(casilla_valida => {
+      if(this.seleccionada) {
+        casilla_valida.setColor(verde);
+      }
+      else {
+        casilla_valida.setColor(casilla_valida.colorInicial);
+      }
+    }) 
+
+    return casillas_validas;
+  }
+
+  movimientoPosibles(tablero) {
+    let casillas_validas = [];
+    let casilla_actual;
+    let i=this.casilla.posX;
+    let j=this.casilla.posY;
+
+    //L hacia delante
+    if(j>1) {
+
+      //Derecha
+      if(i<7) {
+        casilla_actual = tablero[i+1][j-2];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+
+      //Izquierda
+      if(i>0) {
+        casilla_actual = tablero[i-1][j-2];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+    }
+
+    //L hacia atrás
+    if(j<6) {
+
+      //Izquierda
+      if(i>0) {
+        casilla_actual = tablero[i-1][j+2];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+
+      //Derecha
+      if(i<7) {
+        casilla_actual = tablero[i+1][j+2];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+    }
+
+    //L hacia la derecha
+    if(i<6) {
+
+      //Arriba
+      if(j>0) {
+        casilla_actual = tablero[i+2][j-1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+
+      //Abajo
+      if(j<7) {
+        casilla_actual = tablero[i+2][j+1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+    }
+
+    //L hacia la izquierda
+    if(i>1) {
+
+      //Arriba
+      if(j>0) {
+        casilla_actual = tablero[i-2][j-1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+
+      //Abajo
+      if(j<7) {
+        casilla_actual = tablero[i-2][j+1];
+        if(casilla_actual.pieza == null || casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+    }
+
+    return casillas_validas;
   }
 }
 

@@ -30,7 +30,7 @@ class peon extends Pieza {
     var material = new THREE.MeshStandardMaterial({color: color});
 
     //Extraemos los puntos del shape
-    var points = shape.extractPoints(20).shape;
+    var points = shape.extractPoints(10).shape;
 
     //Definimos la geometria
     var geometry = new THREE.LatheGeometry(points,24, 0, Math.PI*2);
@@ -43,11 +43,11 @@ class peon extends Pieza {
 
     //*****************Cabeza**************** */
     //Para ello definimos las geometrias necesarias
-    var esfera = new THREE.SphereGeometry(1.3, 32, 16 );
+    var esfera = new THREE.SphereGeometry(1.3);
     var cubo = new THREE.BoxGeometry(2, 2, 2);
-    var cilindro1 = new THREE.CylinderGeometry(0.7,0.7,3);
-    var cilindro2 = new THREE.CylinderGeometry(0.7,0.7,3);
-    var cilindro3 = new THREE.CylinderGeometry(0.7,0.7,3);
+    var cilindro1 = new THREE.CylinderGeometry(0.7,0.7,3,16,16);
+    var cilindro2 = new THREE.CylinderGeometry(0.7,0.7,16,16);
+    var cilindro3 = new THREE.CylinderGeometry(0.7,0.7,16,16);
 
     //Posicionamos los cilindros en forma de cruz
     cilindro2.rotateX(Math.PI/2);
@@ -74,7 +74,7 @@ class peon extends Pieza {
     this.peon.add(resultado);
 
     //creamos la esfera de dentro de la cabeza, la posicionamos y la añadimos al objeto
-    var geometryCabeza = new THREE.SphereGeometry(0.7);
+    var geometryCabeza = new THREE.SphereGeometry(0.7,10);
     geometryCabeza.translate(0, 4.5, 0);
     var cabeza = new THREE.Mesh(geometryCabeza, material);
     this.peon.add(cabeza);
