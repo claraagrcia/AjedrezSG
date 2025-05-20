@@ -11,20 +11,21 @@ class peon extends Pieza {
     this.peon = new THREE.Object3D();
     const textureLoader = new THREE.TextureLoader();
     const normalMap = textureLoader.load("../imgs/flor.png");
-    var Mat = new THREE.MeshStandardMaterial({color: color, normalMap: normalMap});
+    var Mat = new THREE.MeshStandardMaterial({color: color, normalMap: normalMap, normalScale: new THREE.Vector2(1, 1)});
     
     //*********************Cuerpo********************** */
 
     //Creamos el contorno que vamos a revolucionar para hacer el contorno del cuerpo del peon
     var shape = new THREE.Shape();
     shape.moveTo(0,0);
-    shape.lineTo(2.0);
+    shape.lineTo(2.0, 0.0);
     shape.lineTo(2.0, 0.25);
     shape.lineTo(1.8, 0.4);
     shape.quadraticCurveTo(1.7, 0.8, 1.5, 0.8);
     shape.lineTo(1.5, 1.0);
-    shape.bezierCurveTo(1.0, 1.2, 0.9, 1.4, 0.9, 2,7);
-    shape.lineTo(0.9, 3.0);
+    shape.bezierCurveTo(1.0, 1.2, 0.9, 1.4, 0.9, 3);
+    //shape.lineTo(0.9, 2.7);
+    //shape.lineTo(0.9, 3.0);
     shape.quadraticCurveTo(1.5, 3.0, 1.2, 3.25);
     shape.quadraticCurveTo(1.2, 3.5, 0.6, 3.5);
     shape.lineTo(0, 3.5);
