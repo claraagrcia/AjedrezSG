@@ -80,6 +80,17 @@ class Pieza extends THREE.Object3D {
     actualizarCasilla(casilla_nueva) {
         this.casilla = casilla_nueva;
     }
+
+    changeColor(nuevo_color) {
+        this.color = nuevo_color;
+
+        // Recorrer todos los hijos del Object3D
+        this.getMesh().traverse((child) => {
+            if (child.isMesh && child.material && child.material.color) {
+            child.material.color.set(nuevo_color);
+            }
+        });
+    }
 }
 
 export {Pieza};
