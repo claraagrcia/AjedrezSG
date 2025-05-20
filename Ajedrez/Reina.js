@@ -1,5 +1,6 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
+import * as TWEEN from '../libs/tween.module.js'
 import { Pieza } from './Pieza.js';
 import { lila,verde } from './Tablero.js';
  
@@ -140,66 +141,17 @@ class Reina extends Pieza {
     corona.add(toro_corona_mesh);
     corona.add(cilindro_corona_mesh);
 
-    //Lanza
-
-    var materialMango = new THREE.MeshStandardMaterial({color: 0x6c3b2a});
-    const metalMaterial = new THREE.MeshStandardMaterial({
-        color: 0x9c9c9c,      // color plateado claro
-        metalness: 0.8,       // completamente metálico
-        roughness: 0.2,      // muy pulido, casi como espejo
-        envMapIntensity: 1.5,  // reflejos intensos si hay envMap
-        flatShading: true
-    });
-    var lanza = new THREE.Object3D();
-
-    var geom_palo = new THREE.CylinderGeometry(0.1,0.1,6,10,10);
-    geom_palo.translate(0,3.125,0);
-    var palo_mesh = new THREE.Mesh(geom_palo, materialMango);
-
-    var geom_bolita = new THREE.SphereGeometry(0.15,10);
-    geom_bolita.translate(0,0.075,0);
-    var bolita_mesh = new THREE.Mesh(geom_bolita,this.Mat);
-
-    var geom_adorno = new THREE.TorusGeometry(0.1,0.05,10);
-    geom_adorno.rotateX(Math.PI/2);
-    geom_adorno.translate(0,0.125,0);
-    var adorno_mesh1 = new THREE.Mesh(geom_adorno,this.Mat);
-    var adorno_mesh2 = new THREE.Mesh(geom_adorno,this.Mat);
-    var adorno_mesh3 = new THREE.Mesh(geom_adorno,this.Mat);
-    adorno_mesh2.translateY(6);
-    adorno_mesh3.translateY(5.8);
-
-    var geom_punta_superior = new THREE.ConeGeometry(0.2,1,4);
-    geom_punta_superior.translate(0,6.9,0);
-    var punta_superior_mesh = new THREE.Mesh(geom_punta_superior,metalMaterial);
-
-    var geom_punta_inferior = new THREE.ConeGeometry(0.2,0.4,4);
-    geom_punta_inferior.rotateZ(Math.PI);
-    geom_punta_inferior.translate(0,6.2,0);
-    var punta_inferior_mesh = new THREE.Mesh(geom_punta_inferior,metalMaterial);
-
-    lanza.translateX(2.4);
-    lanza.translateZ(0.4);
-    lanza.rotateZ(-0.2);
-
-    lanza.add(punta_inferior_mesh);
-    lanza.add(punta_superior_mesh);
-    lanza.add(adorno_mesh3);
-    lanza.add(adorno_mesh2);
-    lanza.add(adorno_mesh1);
-    lanza.add(bolita_mesh);
-    lanza.add(palo_mesh);
 
     //Brazos
-    var brazo_dcho = this.crearBrazo(0,0.2, materialMarmol);
+    var brazo_dcho = this.crearBrazoDerecho(0,0.2, materialMarmol);
     brazo_dcho.translateX(-2);
     brazo_dcho.translateY(5.4);
     brazo_dcho.rotateZ(-0.1);
 
-    var brazo_izq = this.crearBrazo(-0.3,2, materialMarmol);
-    brazo_izq.translateX(2);
-    brazo_izq.translateY(5.4);
-    brazo_izq.rotateZ(0.2);
+    this.brazo_izq = this.crearBrazoIzquierdo(0,2, materialMarmol);
+    this.brazo_izq.translateX(2);
+    this.brazo_izq.translateY(5.4);
+    this.brazo_izq.rotateZ(0.2);
   
     this.reina = new THREE.Object3D();
     this.reina.add(base);
@@ -209,9 +161,9 @@ class Reina extends Pieza {
     this.reina.add(espirales_delanteras);
     this.reina.add(espirales_traseras);
     this.reina.add(corona);
-    this.reina.add(lanza);
+    //this.reina.add(this.lanza);
     this.reina.add(brazo_dcho);
-    this.reina.add(brazo_izq);
+    this.reina.add(this.brazo_izq);
     
     this.reina.scale.set(0.2,0.2,0.2);
     if(color == lila) {
@@ -227,6 +179,7 @@ class Reina extends Pieza {
   }
 
   onClick(tablero) {
+    //this.lucha();
     this.seleccionada = !this.seleccionada;
     let casillas_validas = this.movimientoPosibles(tablero);
 
@@ -295,7 +248,7 @@ class Reina extends Pieza {
     return espiral;
   }
 
-  crearBrazo(anguloX, anguloZ, material) {
+  crearBrazoDerecho(anguloX, anguloZ, material) {
     var brazo = new THREE.Object3D();
     var parte_inf = new THREE.Object3D();
 
@@ -329,13 +282,281 @@ class Reina extends Pieza {
     //Hombros
     var geom_hombro = new THREE.SphereGeometry(0.35);
     var hombro = new THREE.Mesh(geom_hombro, material);
-  
+
     brazo.add(parte_inf);
     brazo.add(brazo_sup);
     brazo.add(hombro);
 
+    brazo.brazo_sup = brazo_sup;
+    brazo.parte_inf = parte_inf;
+
     return brazo;
    
+  }
+
+  crearBrazoIzquierdo(anguloX, anguloZ, material) {
+    // var brazo = new THREE.Object3D();
+    // var parte_inf = new THREE.Object3D();
+
+    // //Lanza
+    // var materialMango = new THREE.MeshStandardMaterial({color: 0x6c3b2a});
+    // const metalMaterial = new THREE.MeshStandardMaterial({
+    //     color: 0x9c9c9c,      // color plateado claro
+    //     metalness: 0.8,       // completamente metálico
+    //     roughness: 0.2,      // muy pulido, casi como espejo
+    //     envMapIntensity: 1.5,  // reflejos intensos si hay envMap
+    //     flatShading: true
+    // });
+    // this.lanza = new THREE.Object3D();
+
+    // var geom_palo = new THREE.CylinderGeometry(0.1,0.1,6,10,10);
+    // geom_palo.translate(0,3.125,0);
+    // var palo_mesh = new THREE.Mesh(geom_palo, materialMango);
+
+    // var geom_bolita = new THREE.SphereGeometry(0.15,10);
+    // geom_bolita.translate(0,0.075,0);
+    // var bolita_mesh = new THREE.Mesh(geom_bolita,this.Mat);
+
+    // var geom_adorno = new THREE.TorusGeometry(0.1,0.05,10);
+    // geom_adorno.rotateX(Math.PI/2);
+    // geom_adorno.translate(0,0.125,0);
+    // var adorno_mesh1 = new THREE.Mesh(geom_adorno,this.Mat);
+    // var adorno_mesh2 = new THREE.Mesh(geom_adorno,this.Mat);
+    // var adorno_mesh3 = new THREE.Mesh(geom_adorno,this.Mat);
+    // adorno_mesh2.translateY(6);
+    // adorno_mesh3.translateY(5.8);
+
+    // var geom_punta_superior = new THREE.ConeGeometry(0.2,1,4);
+    // geom_punta_superior.translate(0,6.9,0);
+    // var punta_superior_mesh = new THREE.Mesh(geom_punta_superior,metalMaterial);
+
+    // var geom_punta_inferior = new THREE.ConeGeometry(0.2,0.4,4);
+    // geom_punta_inferior.rotateZ(Math.PI);
+    // geom_punta_inferior.translate(0,6.2,0);
+    // var punta_inferior_mesh = new THREE.Mesh(geom_punta_inferior,metalMaterial);
+
+    // this.lanza.rotation.set(0,0,-Math.PI/2);
+    // this.lanza.position.x = 4.5;
+    
+    // this.lanza.add(punta_inferior_mesh);
+    // this.lanza.add(punta_superior_mesh);
+    // this.lanza.add(adorno_mesh3);
+    // this.lanza.add(adorno_mesh2);
+    // this.lanza.add(adorno_mesh1);
+    // this.lanza.add(bolita_mesh);
+    // this.lanza.add(palo_mesh);
+
+    // //Manos
+    // var geom_mano = new THREE.SphereGeometry(0.3);
+    // geom_mano.translate(0,-1.5,0);
+    // var mano = new THREE.Mesh(geom_mano, material);
+
+    // this.mano = new THREE.Object3D();
+    // this.mano.position.set(0, -1.5, 0); // igual que la posición de la mano
+    // this.mano.add(this.lanza);
+
+    // mano.add(this.mano);
+
+    // //Antebrazos
+    // var geom_antebrazo = new THREE.CylinderGeometry(0.2,0.15,1.5,32,32);
+    // geom_antebrazo.translate(0, -0.75,0);
+    // var antebrazo = new THREE.Mesh(geom_antebrazo, material);
+    
+    // //Codos
+    // var geom_codo = new THREE.SphereGeometry(0.2);
+    // var codo = new THREE.Mesh(geom_codo,material);
+
+    // parte_inf.add(codo);
+    // parte_inf.add(antebrazo);
+    // parte_inf.add(mano);
+
+    // parte_inf.translateY(-1.2);
+    // parte_inf.rotateZ(anguloZ);
+    // parte_inf.rotateX(anguloX);
+
+    // //Parte superior del brazo
+    // var geom_brazo_sup = new THREE.CylinderGeometry(0.25,0.2,1.2,32,32);
+    // geom_brazo_sup.translate(0,-0.6,0);
+    // var brazo_sup = new THREE.Mesh(geom_brazo_sup, material);
+
+    // //Hombros
+    // var geom_hombro = new THREE.SphereGeometry(0.35);
+    // var hombro = new THREE.Mesh(geom_hombro, material);
+
+    // brazo.add(parte_inf);
+    // brazo.add(brazo_sup);
+    // brazo.add(hombro);
+
+    // brazo.brazo_sup = brazo_sup;
+    // brazo.parte_inf = parte_inf;
+
+    var brazo = new THREE.Object3D();
+    var parte_inf = new THREE.Object3D();
+
+    //Lanza
+    var materialMango = new THREE.MeshStandardMaterial({color: 0x6c3b2a});
+    const metalMaterial = new THREE.MeshStandardMaterial({
+        color: 0x9c9c9c,      // color plateado claro
+        metalness: 0.8,       // completamente metálico
+        roughness: 0.2,      // muy pulido, casi como espejo
+        envMapIntensity: 1.5,  // reflejos intensos si hay envMap
+        flatShading: true
+    });
+    this.lanza = new THREE.Object3D();
+
+    var geom_palo = new THREE.CylinderGeometry(0.1,0.1,6,10,10);
+    geom_palo.translate(0,3.125,0);
+    var palo_mesh = new THREE.Mesh(geom_palo, materialMango);
+
+    var geom_bolita = new THREE.SphereGeometry(0.15,10);
+    geom_bolita.translate(0,0.075,0);
+    var bolita_mesh = new THREE.Mesh(geom_bolita,this.Mat);
+
+    var geom_adorno = new THREE.TorusGeometry(0.1,0.05,10);
+    geom_adorno.rotateX(Math.PI/2);
+    geom_adorno.translate(0,0.125,0);
+    var adorno_mesh1 = new THREE.Mesh(geom_adorno,this.Mat);
+    var adorno_mesh2 = new THREE.Mesh(geom_adorno,this.Mat);
+    var adorno_mesh3 = new THREE.Mesh(geom_adorno,this.Mat);
+    adorno_mesh2.translateY(6);
+    adorno_mesh3.translateY(5.8);
+
+    var geom_punta_superior = new THREE.ConeGeometry(0.2,1,4);
+    geom_punta_superior.translate(0,6.9,0);
+    var punta_superior_mesh = new THREE.Mesh(geom_punta_superior,metalMaterial);
+
+    var geom_punta_inferior = new THREE.ConeGeometry(0.2,0.4,4);
+    geom_punta_inferior.rotateZ(Math.PI);
+    geom_punta_inferior.translate(0,6.2,0);
+    var punta_inferior_mesh = new THREE.Mesh(geom_punta_inferior,metalMaterial);
+
+    this.lanza.rotation.set(0,0,-Math.PI/2);
+    this.lanza.position.x = -4.5;
+    
+
+    this.lanza.add(punta_inferior_mesh);
+    this.lanza.add(punta_superior_mesh);
+    this.lanza.add(adorno_mesh3);
+    this.lanza.add(adorno_mesh2);
+    this.lanza.add(adorno_mesh1);
+    this.lanza.add(bolita_mesh);
+    this.lanza.add(palo_mesh);
+
+    //Manos
+    var geom_mano = new THREE.SphereGeometry(0.3);
+    geom_mano.translate(0,-1.5,0);
+    var mano = new THREE.Mesh(geom_mano, material);
+
+    this.mano = new THREE.Object3D();
+    this.mano.position.set(0, -1.5, 0); // igual que la posición de la mano
+    this.mano.rotation.z = -Math.PI/4;
+    this.mano.add(this.lanza);
+
+    mano.add(this.mano);
+
+    //Antebrazos
+    var geom_antebrazo = new THREE.CylinderGeometry(0.2,0.15,1.5,32,32);
+    geom_antebrazo.translate(0, -0.75,0);
+    var antebrazo = new THREE.Mesh(geom_antebrazo, material);
+    
+    //Codos
+    var geom_codo = new THREE.SphereGeometry(0.2);
+    var codo = new THREE.Mesh(geom_codo,material);
+
+    parte_inf.add(codo);
+    parte_inf.add(antebrazo);
+    parte_inf.add(mano);
+
+    parte_inf.translateY(-1.2);
+    parte_inf.rotateZ(anguloZ);
+    parte_inf.rotateX(anguloX);
+
+    //Parte superior del brazo
+    var geom_brazo_sup = new THREE.CylinderGeometry(0.25,0.2,1.2,32,32);
+    geom_brazo_sup.translate(0,-0.6,0);
+    var brazo_sup = new THREE.Mesh(geom_brazo_sup, material);
+
+    //Hombros
+    var geom_hombro = new THREE.SphereGeometry(0.35);
+    var hombro = new THREE.Mesh(geom_hombro, material);
+
+    brazo.add(parte_inf);
+    brazo.add(brazo_sup);
+    brazo.add(hombro);
+
+    brazo.brazo_sup = brazo_sup;
+    brazo.parte_inf = parte_inf;
+
+
+
+    return brazo;
+   
+  }
+
+  customBackIn(overshoot) {
+    return function(t) {
+      return t * t * ((overshoot + 1) * t - overshoot);
+    };
+  }
+
+  lucha(pieza_seleccionada,casilla_seleccionada,tablero,escena) {
+
+    const brazo_izq = this.brazo_izq;
+    const mano = this.mano;
+
+    //Estiramos el brazo
+    new TWEEN.Tween({parte_superior: this.brazo_izq.rotation.z, parte_inferior: this.brazo_izq.parte_inf.rotation.z})
+    .to({
+      parte_superior: Math.PI/2-0.2,
+      parte_inferior: 0,
+    }, 1000) 
+    .easing(TWEEN.Easing.Quadratic.Out)
+    .onUpdate(function(obj) {
+      brazo_izq.rotation.z = obj.parte_superior;
+      brazo_izq.parte_inf.rotation.z = obj.parte_inferior;
+    })
+    .onComplete(() => {
+      new TWEEN.Tween({rotX: 0})
+      .to({
+        rotX: Math.PI*9,
+      }, 2500) 
+      .easing(TWEEN.Easing.Quadratic.Out)
+      .onUpdate(function(obj) {
+        mano.rotation.z = 0;
+        mano.rotation.y = -obj.rotX;
+      })
+      .onComplete(() => {
+        new TWEEN.Tween({rot_brazo: this.brazo_izq.parte_inf.rotation.z, rot_mano : this.mano.rotation.y})
+        .to({
+          rot_brazo: Math.PI/2,
+          rot_mano: this.mano.rotation.y+Math.PI/2
+        }, 1500) 
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(function(obj) {
+          brazo_izq.parte_inf.rotation.z = obj.rot_brazo;
+          mano.rotation.y = obj.rot_mano;
+        })
+        .onComplete(() => {
+          new TWEEN.Tween({rot_brazo: this.brazo_izq.parte_inf.rotation.y})
+          .to({
+            rot_brazo: -Math.PI/6,
+          }, 1500) 
+          .easing(this.customBackIn(10))
+          .onUpdate(function(obj) {
+            brazo_izq.parte_inf.rotation.y = obj.rot_brazo;
+          })
+          .onComplete(() => {
+            pieza_seleccionada.mover(casilla_seleccionada,tablero,escena);
+          })
+          .start();
+        })
+        .start();
+          
+      })
+      .start();
+        
+    })
+    .start();
   }
 
   movimientoPosibles(tablero) {

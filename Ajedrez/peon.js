@@ -40,7 +40,7 @@ class peon extends Pieza {
     var geometry = new THREE.LatheGeometry(points,24, 0, Math.PI*2);
 
     //Contruimos el Mesh
-    var mesh = new THREE.Mesh( geometry, Mat);
+    var mesh = new THREE.Mesh( geometry, material);
 
     //Lo añadimos como hijo del Object3D
     this.peon.add (mesh);
