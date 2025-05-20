@@ -5,13 +5,12 @@ import * as THREE from '../libs/three.module.js'
 import { GUI } from '../libs/dat.gui.module.js'
 import { TrackballControls } from '../libs/TrackballControls.js'
 import  Stats from '../libs/stats.module.js'
-import * as TWEEN from '../libs/tween.module.js'
 
 // Clases de mi proyecto
-import { Tablero } from './Tablero.js'
-import { Casilla } from './Casilla.js'
-import { Pieza } from './Pieza.js'
-import { Reina } from './Reina.js'
+
+import { caballo } from './caballo.js'
+
+ 
 /// La clase fachada del modelo
 /**
  * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
@@ -30,14 +29,16 @@ class MyScene extends THREE.Scene {
     this.initStats();
     
     // Construimos los distinos elementos que tendremos en la escena
-    this.createCamera();
     
     // Todo elemento que se desee sea tenido en cuenta en el renderizado de la escena debe pertenecer a esta. Bien como hijo de la escena (this en esta clase) o como hijo de un elemento que ya esté en la escena.
     // Tras crear cada elemento se añadirá a la escena con   this.add(variable)
     this.createLights ();
     
+    // Tendremos una cámara con un control de movimiento con el ratón
+    this.createCamera ();
+    
     // Un suelo 
-    this.createGround ();
+    //this.createGround ();
     
     // Y unos ejes. Imprescindibles para orientarnos sobre dónde están las cosas
     // Todas las unidades están en metros
@@ -48,102 +49,11 @@ class MyScene extends THREE.Scene {
     // Por último creamos el modelo.
     // El modelo puede incluir su parte de la interfaz gráfica de usuario. Le pasamos la referencia a 
     // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
-    this.model = new Tablero(this.gui, "Controles de la Caja");
+    this.model = new caballo(this.gui, "Controles de la Caja");
     this.add (this.model);
-
-    this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2();
-    this.piezaSeleccionada = null;
-    this.casillas_validas = null;
-    this.casilla_seleccionada = null;
-    this.estado = 0; //esperando pieza
-    this.turno = "blanco";
-
-    this.camara = new THREE.Object3D();
-    this.camara.add(this.getCamera());
-    this.add(this.camara);
-    this.cambiarCamara(this.turno);
-    
-
-    window.addEventListener('click', (event) => this.onClick(event));
+	
   }
-
-  onClick(event) {
-     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-     this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
-
-     this.raycaster.setFromCamera(this.mouse,this.camera);
-
-     if(this.estado == 0) {
-      if(this.turno == "lila") {
-        var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables_lilas,true);
-      }
-      else if(this.turno == "blanco") {
-        var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables_blancas,true);
-      }
-      
-      console.log(pickedObjects);
-      if(pickedObjects.length>0) {
-        let nodo = pickedObjects[0].object;
-        while(nodo) {
-         if(nodo.userData && nodo.userData.refPieza) {
-           this.piezaSeleccionada = nodo.userData.refPieza;
-           break;
-         }
-         nodo = nodo.parent;
-        }
- 
-        if(this.piezaSeleccionada && typeof this.piezaSeleccionada.onClick === 'function') {
-         this.casillas_validas = this.piezaSeleccionada.onClick(this.model.casillas);
-         if(this.casillas_validas.length>0) {
-          this.estado = 1; //esperando casilla
-         }
-         else {
-          this.estado = 0; //elegir otra pieza
-         }
-         
-        }
-        else {
-         console.log("Objeto seleccionado no tiene onClick");
-        }
-      } 
-     }
-    
-     else if(this.estado == 1) {
-      var pickedCasillas = this.raycaster.intersectObjects(this.casillas_validas,true);
-      if (pickedCasillas.length > 0 && this.piezaSeleccionada) {
-        this.casilla_seleccionada = pickedCasillas[0].object.userData;
-
-          if(this.piezaSeleccionada instanceof Reina && this.casilla_seleccionada.pieza != null) {
-            //this.cambiarCamaraLucha();
-            this.piezaSeleccionada.lucha(this.piezaSeleccionada,this.casilla_seleccionada,this.model,this);
-          }
-          else {
-            
-            // Movemos la pieza a la casilla seleccionada
-            this.piezaSeleccionada.mover(this.casilla_seleccionada,this.model,this);
-
-          }
-
-          //Limpiamos las casillas válidas
-          this.piezaSeleccionada.seleccionada = !this.piezaSeleccionada.seleccionada;
-          this.casillas_validas.forEach(casilla_valida => {
-            casilla_valida.setColor(casilla_valida.colorInicial);
-          }) 
-          
-          this.estado = 0;
-    
-          // Limpiar los atributos correspondientes
-          this.piezaSeleccionada = null;
-          this.casilla_seleccionada = null;
-          this.casillas_validas = null;
-          
-      }
-     }
-    
-  }
-     
-
+  
   initStats() {
   
     var stats = new Stats();
@@ -165,13 +75,14 @@ class MyScene extends THREE.Scene {
     //   El ángulo del campo de visión en grados sexagesimales
     //   La razón de aspecto ancho/alto
     //   Los planos de recorte cercano y lejano
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 50);
-      // Recuerda: Todas las unidades están en metros
-      // También se indica dónde se coloca
-      this.camera.position.set (5, 10, 5);
-      // Y hacia dónde mira
-      var look = new THREE.Vector3 (0,0,0);
-      this.camera.lookAt(look);
+    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
+    // Recuerda: Todas las unidades están en metros
+    // También se indica dónde se coloca
+    this.camera.position.set (4, 2, 4);
+    // Y hacia dónde mira
+    var look = new THREE.Vector3 (0,0,0);
+    this.camera.lookAt(look);
+    this.add (this.camera);
     
     // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
     this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
@@ -181,45 +92,6 @@ class MyScene extends THREE.Scene {
     this.cameraControl.panSpeed = 0.5;
     // Debe orbitar con respecto al punto de mira de la cámara
     this.cameraControl.target = look;
-  }
-
-  cambiarCamara(turno) {
-  
-    let angulo = 0;
-
-    if(turno == "lila") {
-      angulo = -Math.PI/4;
-    }
-    else if(turno == "blanco") {
-      angulo = 3*Math.PI/4;
-    }
-
-    // Guardar el valor actual de rotación
-    const actual = { y: this.camara.rotation.y };
-
-    // Tween sobre objeto plano
-    new TWEEN.Tween(actual)
-      .to({ y: angulo }, 1000)
-      .easing(TWEEN.Easing.Quadratic.InOut)
-      .onUpdate(() => {
-        this.camara.rotation.y = actual.y;
-      })
-      .start();
-  }
-
-  cambiarCamaraLucha() {
-
-    // Guardar el valor actual de rotación
-    const actual = { y: this.camara.rotation.y };
-
-    // Tween sobre objeto plano
-    new TWEEN.Tween(actual)
-      .to({ y: this.camara.rotation.y+Math.PI/2}, 1000)
-      .easing(TWEEN.Easing.Quadratic.InOut)
-      .onUpdate(() => {
-        this.camara.rotation.y = actual.y;
-      })
-      .start();
   }
   
   createGround () {
@@ -237,7 +109,7 @@ class MyScene extends THREE.Scene {
     
     // Todas las figuras se crean centradas en el origen.
     // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
-    ground.position.y = -0.125;
+    ground.position.y = -0.1;
     
     // Que no se nos olvide añadirlo a la escena, que en este caso es  this
     this.add (ground);
@@ -369,8 +241,6 @@ class MyScene extends THREE.Scene {
     // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
     // Si no existiera esta línea,  update()  se ejecutaría solo la primera vez.
     requestAnimationFrame(() => this.update())
-
-    TWEEN.update();
   }
 }
 
