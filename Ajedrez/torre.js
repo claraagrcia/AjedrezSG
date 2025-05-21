@@ -1,11 +1,12 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import { Pieza } from '../Ajedrez/Pieza.js';
-import { verde } from './Tablero.js';
+import { verde,rojo } from './Tablero.js';
  
 class torre extends Pieza{
   constructor(color,casilla) {
     super(color,casilla);
+    this.tipo = "Torre";
     
       //var loader = new THREE.TextureLoader ( ) ;
       //var textura = loader.load("../imgs/texturaMadera.jpg");
@@ -368,6 +369,9 @@ class torre extends Pieza{
       casillas_validas.forEach(casilla_valida => {
         if(this.seleccionada) {
           casilla_valida.setColor(verde);
+          if(casilla_valida.pieza != null) {
+            casilla_valida.setColor(rojo);
+          }
         }
         else {
           casilla_valida.setColor(casilla_valida.colorInicial);

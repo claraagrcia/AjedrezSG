@@ -1,6 +1,6 @@
 import * as THREE from '../libs/three.module.js'
 import * as TWEEN from '../libs/tween.module.js'
-import { lila,blanco } from './Tablero.js';
+import { lila,blanco,rojo } from './Tablero.js';
 
 class Pieza extends THREE.Object3D {
     constructor(color,casilla) {
@@ -8,6 +8,7 @@ class Pieza extends THREE.Object3D {
         this.color = color;
         this.casilla = casilla;
         this.seleccionada = false;
+        this.tipo;
     }
     
     //método abstracto (se implementa en cada clase concreta)
@@ -20,11 +21,15 @@ class Pieza extends THREE.Object3D {
         throw new Error("Este método debe ser implementado por la subclase.");
     }
 
-    mover(casilla_seleccionada,tablero,escena) {
+    mover(casilla_seleccionada,tablero,escena,spotLight=null) {
         var destino = casilla_seleccionada.obtenerPosicionMundo(); 
         const posicionActual = this.getMesh().position;
         const parent = this.getMesh().parent;
         const destinoLocal = parent.worldToLocal(destino.clone());
+
+        if(casilla_seleccionada.pieza != null) {
+            escena.pointLight.color.set(rojo);
+        }
 
         new TWEEN.Tween(posicionActual)
             .to({
@@ -69,6 +74,14 @@ class Pieza extends THREE.Object3D {
                     escena.turno = "lila";
                     escena.cambiarCamara(escena.turno);
                   }
+
+                  escena.pointLight.color.set(blanco);
+
+                  if(casilla_seleccionada.pieza != null && this.tipo == "Reina") {
+                    escena.remove(spotLight);
+                    escena.setAmbientIntensity(0.5);
+                  }
+
             })
             .start();
     }

@@ -3,12 +3,12 @@ import * as CSG from '../libs/three-bvh-csg.js'
 import { MTLLoader } from '../libs/MTLLoader.js'
 import { OBJLoader } from '../libs/OBJLoader.js'
 import { Pieza } from './Pieza.js' 
-import {lila,verde} from './Tablero.js'
+import {lila,verde,rojo} from './Tablero.js'
 
 class caballo extends Pieza {
   constructor(color,casilla) {
     super(color,casilla);
-    
+    this.tipo = "Caballo";
 
     //Creamos un objeto 3d caballo
     let contenedor = new THREE.Object3D();
@@ -124,6 +124,9 @@ class caballo extends Pieza {
     casillas_validas.forEach(casilla_valida => {
       if(this.seleccionada) {
         casilla_valida.setColor(verde);
+        if(casilla_valida.pieza != null) {
+          casilla_valida.setColor(rojo);
+        }
       }
       else {
         casilla_valida.setColor(casilla_valida.colorInicial);

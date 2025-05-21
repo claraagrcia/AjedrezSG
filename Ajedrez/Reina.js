@@ -2,11 +2,12 @@ import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
 import * as TWEEN from '../libs/tween.module.js'
 import { Pieza } from './Pieza.js';
-import { lila,verde } from './Tablero.js';
+import { rojo,verde } from './Tablero.js';
  
 class Reina extends Pieza {
   constructor(color,casilla) {
     super(color,casilla);
+    this.tipo = "Reina";
    
     // Material
     this.Mat = new THREE.MeshStandardMaterial({color: color});
@@ -177,13 +178,15 @@ class Reina extends Pieza {
   }
 
   onClick(tablero) {
-    //this.lucha();
     this.seleccionada = !this.seleccionada;
     let casillas_validas = this.movimientoPosibles(tablero);
 
     casillas_validas.forEach(casilla_valida => {
       if(this.seleccionada) {
         casilla_valida.setColor(verde);
+        if(casilla_valida.pieza != null) {
+          casilla_valida.setColor(rojo);
+        }
       }
       else {
         casilla_valida.setColor(casilla_valida.colorInicial);
@@ -402,25 +405,37 @@ class Reina extends Pieza {
   }
 
   lucha(pieza_seleccionada,casilla_seleccionada,tablero,escena) {
-console.log(this.reina.rotation.y);
+
+    //Ponemos una luz direccional
+    var spotLight = new THREE. SpotLight (0xfcfcfc) ;
+
+    spotLight . power = 350;
+    spotLight . angle = Math . PI / 6 ; 
+    spotLight . penumbra = 1; 
+    spotLight . position . set (0 , 5 , 0) ; 
+    spotLight . target = this.reina ; 
+    escena.setAmbientIntensity(0.2);
+    escena.add(spotLight) ;
+   
+
     const brazo_izq = this.brazo_izq;
     const mano = this.mano;
     const lanza = this.lanza;
 
     // Posición actual
-const origen = new THREE.Vector3();
-this.reina.getWorldPosition(origen);
+    const origen = new THREE.Vector3();
+    this.reina.getWorldPosition(origen);
 
-// Posición del objetivo
-const destino = new THREE.Vector3();
-casilla_seleccionada.pieza.getMesh().getWorldPosition(destino);
+    // Posición del objetivo
+    const destino = new THREE.Vector3();
+    casilla_seleccionada.pieza.getMesh().getWorldPosition(destino);
 
-// Dirección en plano XZ
-const dx = destino.x - origen.x;
-const dz = destino.z - origen.z;
+    // Dirección en plano XZ
+    const dx = destino.x - origen.x;
+    const dz = destino.z - origen.z;
 
-// Calculamos ángulo (asumiendo que el peón por defecto mira en Z+)
-const angulo = Math.atan2(dx, dz);
+    // Calculamos ángulo (asumiendo que el peón por defecto mira en Z+)
+    const angulo = Math.atan2(dx, dz);
     new TWEEN.Tween(this.reina.rotation)
     .to({ y: angulo }, 500)
     .easing(TWEEN.Easing.Quadratic.Out)
@@ -498,7 +513,7 @@ const angulo = Math.atan2(dx, dz);
             })
             .onComplete(() => {
 
-              casilla_seleccionada.pieza.changeColor(0xFF6961);
+              casilla_seleccionada.pieza.changeColor(rojo);
               //pieza_seleccionada.mover(casilla_seleccionada,tablero,escena);
 
               //Volvemos hacia atrás el impulso tween 6
@@ -538,8 +553,7 @@ const angulo = Math.atan2(dx, dz);
                       
                     })
                     .onComplete(() => {
-
-                      pieza_seleccionada.mover(casilla_seleccionada,tablero,escena);
+                      pieza_seleccionada.mover(casilla_seleccionada,tablero,escena,spotLight);
                     })
                     .start();
                   })
@@ -564,6 +578,7 @@ const angulo = Math.atan2(dx, dz);
         
     })
     .start();
+
   }
 
   movimientoPosibles(tablero) {
