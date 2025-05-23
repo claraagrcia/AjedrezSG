@@ -8,7 +8,7 @@ import  Stats from '../libs/stats.module.js'
 import * as TWEEN from '../libs/tween.module.js'
 
 // Clases de mi proyecto
-import { Tablero } from './Tablero.js'
+import { Tablero,lila } from './Tablero.js'
 import { Casilla } from './Casilla.js'
 import { Pieza } from './Pieza.js'
 import { Reina } from './Reina.js'
@@ -44,6 +44,8 @@ class MyScene extends THREE.Scene {
     this.axis = new THREE.AxesHelper (2);
     this.add (this.axis);
     
+    //Fondo
+    this.cargarEntorno();
     
     // Por último creamos el modelo.
     // El modelo puede incluir su parte de la interfaz gráfica de usuario. Le pasamos la referencia a 
@@ -114,6 +116,7 @@ class MyScene extends THREE.Scene {
       if (pickedCasillas.length > 0 && this.piezaSeleccionada) {
         this.casilla_seleccionada = pickedCasillas[0].object.userData;
 
+          //Si la reina va a capturar una pieza, cambiamos la cámara y hacemos la lucha
           if(this.piezaSeleccionada instanceof Reina && this.casilla_seleccionada.pieza != null) {
             this.cambiarCamaraLucha();
             this.piezaSeleccionada.lucha(this.piezaSeleccionada,this.casilla_seleccionada,this.model,this);
@@ -133,7 +136,7 @@ class MyScene extends THREE.Scene {
           
           this.estado = 0;
     
-          // Limpiar los atributos correspondientes
+          // Limpiamos los atributos correspondientes
           this.piezaSeleccionada = null;
           this.casilla_seleccionada = null;
           this.casillas_validas = null;
@@ -143,7 +146,17 @@ class MyScene extends THREE.Scene {
     
   }
      
-
+  cargarEntorno() {
+    var path = "../imgs/Habitacion/" ;
+    var format = '.png';
+    var urls = [
+      path + 'px' + format , path + 'nx' + format,
+      path + 'py' + format , path + 'ny' + format,
+      path + 'pz' + format , path + 'nz' + format
+    ] ;
+    var textureCube = new THREE.CubeTextureLoader().load(urls) ;
+    this.background = textureCube ;
+  }
   initStats() {
   
     var stats = new Stats();
@@ -173,14 +186,14 @@ class MyScene extends THREE.Scene {
       var look = new THREE.Vector3 (0,0,0);
       this.camera.lookAt(look);
     
-    // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
-    this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
-    // Se configuran las velocidades de los movimientos
-    this.cameraControl.rotateSpeed = 5;
-    this.cameraControl.zoomSpeed = -2;
-    this.cameraControl.panSpeed = 0.5;
-    // Debe orbitar con respecto al punto de mira de la cámara
-    this.cameraControl.target = look;
+    // // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
+    // this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
+    // // Se configuran las velocidades de los movimientos
+    // this.cameraControl.rotateSpeed = 5;
+    // this.cameraControl.zoomSpeed = -2;
+    // this.cameraControl.panSpeed = 0.5;
+    // // Debe orbitar con respecto al punto de mira de la cámara
+    // this.cameraControl.target = look;
   }
 
   cambiarCamara(turno) {
@@ -194,10 +207,10 @@ class MyScene extends THREE.Scene {
       angulo = 3*Math.PI/4;
     }
 
-    // Guardar el valor actual de rotación
+    // Guardamos el valor actual de rotación
     const actual = { y: this.camara.rotation.y };
 
-    // Tween sobre objeto plano
+    // Rotamos la cámara
     new TWEEN.Tween(actual)
       .to({ y: angulo }, 1000)
       .easing(TWEEN.Easing.Quadratic.InOut)
@@ -209,10 +222,10 @@ class MyScene extends THREE.Scene {
 
   cambiarCamaraLucha() {
 
-    // Guardar el valor actual de rotación
+    // Guardamos el valor actual de rotación
     const actual = { y: this.camara.rotation.y };
 
-    // Tween sobre objeto plano
+    // Rotamos la cámara
     new TWEEN.Tween(actual)
       .to({ y: this.camara.rotation.y-Math.PI/2}, 1000)
       .easing(TWEEN.Easing.Quadratic.InOut)
@@ -227,6 +240,8 @@ class MyScene extends THREE.Scene {
     
     // La geometría es una caja con muy poca altura
     var geometryGround = new THREE.BoxGeometry (10,0.2,10);
+    var cilindro = new THREE.CylinderGeometry(2.5,2.5,10);
+    cilindro.translate(0,-5.1,0);
     
     // El material se hará con una textura de madera
     var texture = new THREE.TextureLoader().load('../imgs/wood.jpg');
@@ -234,6 +249,7 @@ class MyScene extends THREE.Scene {
     
     // Ya se puede construir el Mesh
     var ground = new THREE.Mesh (geometryGround, materialGround);
+    var pata = new THREE.Mesh(cilindro,materialGround);
     
     // Todas las figuras se crean centradas en el origen.
     // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
@@ -241,6 +257,7 @@ class MyScene extends THREE.Scene {
     
     // Que no se nos olvide añadirlo a la escena, que en este caso es  this
     this.add (ground);
+    this.add(pata);
   }
   
   createGUI () {
@@ -283,7 +300,7 @@ class MyScene extends THREE.Scene {
     // La luz ambiental solo tiene un color y una intensidad
     // Se declara como   var   y va a ser una variable local a este método
     //    se hace así puesto que no va a ser accedida desde otros métodos
-    this.ambientLight = new THREE.AmbientLight('white', this.guiControls.ambientIntensity);
+    this.ambientLight = new THREE.AmbientLight("white", this.guiControls.ambientIntensity);
     // La añadimos a la escena
     this.add (this.ambientLight);
     
@@ -293,7 +310,7 @@ class MyScene extends THREE.Scene {
     // En este caso se declara como   this.atributo   para que sea un atributo accesible desde otros métodos.
     this.pointLight = new THREE.PointLight( 0xffffff );
     this.pointLight.power = this.guiControls.lightPower;
-    this.pointLight.position.set( 2, 3, 1 );
+    this.pointLight.position.set( 0, 3, 0 );
     this.add (this.pointLight);
   }
   
@@ -357,7 +374,7 @@ class MyScene extends THREE.Scene {
     // Se actualizan los elementos de la escena para cada frame
     
     // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update();
+    //this.cameraControl.update();
     
     // Se actualiza el resto del modelo
     this.model.update();
