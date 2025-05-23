@@ -1,87 +1,247 @@
 
 // Clases de la biblioteca
-// import * as THREE from "three"
 
 import * as THREE from '../libs/three.module.js'
 import { GUI } from '../libs/dat.gui.module.js'
 import { TrackballControls } from '../libs/TrackballControls.js'
+import  Stats from '../libs/stats.module.js'
+import * as TWEEN from '../libs/tween.module.js'
 
 // Clases de mi proyecto
-
-import { Cajas } from './Cajas.js'
-
- 
+import { Tablero,lila } from './Tablero.js'
+import { Casilla } from './Casilla.js'
+import { Pieza } from './Pieza.js'
+import { Reina } from './Reina.js'
 /// La clase fachada del modelo
 /**
  * Usaremos una clase derivada de la clase Scene de Three.js para llevar el control de la escena y de todo lo que ocurre en ella.
  */
 
 class MyScene extends THREE.Scene {
-  // Recibe el  div  que se ha creado en el  html  que va a ser el lienzo en el que mostrar
-  // la visualización de la escena
-  constructor (myCanvas) { 
+  constructor (myCanvas) {
     super();
     
     // Lo primero, crear el visualizador, pasándole el lienzo sobre el que realizar los renderizados.
     this.renderer = this.createRenderer(myCanvas);
     
-    // Se crea la interfaz gráfica de usuario
+    // Se añade a la gui los controles para manipular los elementos de esta clase
     this.gui = this.createGUI ();
     
+    this.initStats();
+    
     // Construimos los distinos elementos que tendremos en la escena
+    this.createCamera();
     
     // Todo elemento que se desee sea tenido en cuenta en el renderizado de la escena debe pertenecer a esta. Bien como hijo de la escena (this en esta clase) o como hijo de un elemento que ya esté en la escena.
     // Tras crear cada elemento se añadirá a la escena con   this.add(variable)
     this.createLights ();
-    
-    // Tendremos una cámara con un control de movimiento con el ratón
-    this.createCamera ();
     
     // Un suelo 
     this.createGround ();
     
     // Y unos ejes. Imprescindibles para orientarnos sobre dónde están las cosas
     // Todas las unidades están en metros
-    this.axis = new THREE.AxesHelper (0.1);
+    this.axis = new THREE.AxesHelper (2);
     this.add (this.axis);
     
+    //Fondo
+    this.cargarEntorno();
     
     // Por último creamos el modelo.
     // El modelo puede incluir su parte de la interfaz gráfica de usuario. Le pasamos la referencia a 
     // la gui y el texto bajo el que se agruparán los controles de la interfaz que añada el modelo.
-    this.model = new Cajas(this.gui, "Controles de las Cajas");
+    this.model = new Tablero(this.gui, "Controles de la Caja");
     this.add (this.model);
+
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+    this.piezaSeleccionada = null;
+    this.casillas_validas = null;
+    this.casilla_seleccionada = null;
+    this.estado = 0; //esperando pieza
+    this.turno = "blanco";
+
+    this.camara = new THREE.Object3D();
+    this.camara.add(this.getCamera());
+    this.add(this.camara);
+    this.cambiarCamara(this.turno);
+    
+
+    window.addEventListener('click', (event) => this.onClick(event));
+  }
+
+  onClick(event) {
+     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+     this.mouse.y = 1 - 2 * (event.clientY / window.innerHeight);
+
+     this.raycaster.setFromCamera(this.mouse,this.camera);
+
+     if(this.estado == 0) {
+      if(this.turno == "lila") {
+        var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables_lilas,true);
+      }
+      else if(this.turno == "blanco") {
+        var pickedObjects = this.raycaster.intersectObjects(this.model.piezas_seleccionables_blancas,true);
+      }
+      
+      console.log(pickedObjects);
+      if(pickedObjects.length>0) {
+        let nodo = pickedObjects[0].object;
+        while(nodo) {
+         if(nodo.userData && nodo.userData.refPieza) {
+           this.piezaSeleccionada = nodo.userData.refPieza;
+           break;
+         }
+         nodo = nodo.parent;
+        }
+ 
+        if(this.piezaSeleccionada && typeof this.piezaSeleccionada.onClick === 'function') {
+         this.casillas_validas = this.piezaSeleccionada.onClick(this.model.casillas);
+         if(this.casillas_validas.length>0) {
+          this.estado = 1; //esperando casilla
+         }
+         else {
+          this.estado = 0; //elegir otra pieza
+         }
+         
+        }
+        else {
+         console.log("Objeto seleccionado no tiene onClick");
+        }
+      } 
+     }
+    
+     else if(this.estado == 1) {
+      var pickedCasillas = this.raycaster.intersectObjects(this.casillas_validas,true);
+      if (pickedCasillas.length > 0 && this.piezaSeleccionada) {
+        this.casilla_seleccionada = pickedCasillas[0].object.userData;
+
+          //Si la reina va a capturar una pieza, cambiamos la cámara y hacemos la lucha
+          if(this.piezaSeleccionada instanceof Reina && this.casilla_seleccionada.pieza != null) {
+            this.cambiarCamaraLucha();
+            this.piezaSeleccionada.lucha(this.piezaSeleccionada,this.casilla_seleccionada,this.model,this);
+          }
+          else {
+            
+            // Movemos la pieza a la casilla seleccionada
+            this.piezaSeleccionada.mover(this.casilla_seleccionada,this.model,this);
+
+          }
+
+          //Limpiamos las casillas válidas
+          this.piezaSeleccionada.seleccionada = !this.piezaSeleccionada.seleccionada;
+          this.casillas_validas.forEach(casilla_valida => {
+            casilla_valida.setColor(casilla_valida.colorInicial);
+          }) 
+          
+          this.estado = 0;
+    
+          // Limpiamos los atributos correspondientes
+          this.piezaSeleccionada = null;
+          this.casilla_seleccionada = null;
+          this.casillas_validas = null;
+          
+      }
+     }
+    
+  }
+     
+  cargarEntorno() {
+    var path = "../imgs/Habitacion/" ;
+    var format = '.png';
+    var urls = [
+      path + 'px' + format , path + 'nx' + format,
+      path + 'py' + format , path + 'ny' + format,
+      path + 'pz' + format , path + 'nz' + format
+    ] ;
+    var textureCube = new THREE.CubeTextureLoader().load(urls) ;
+    this.background = textureCube ;
+  }
+  initStats() {
+  
+    var stats = new Stats();
+    
+    stats.setMode(0); // 0: fps, 1: ms
+    
+    // Align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+    
+    $("#Stats-output").append( stats.domElement );
+    
+    this.stats = stats;
   }
   
   createCamera () {
     // Para crear una cámara le indicamos
-    //   El ángulo del campo de visión vértical en grados sexagesimales
+    //   El ángulo del campo de visión en grados sexagesimales
     //   La razón de aspecto ancho/alto
     //   Los planos de recorte cercano y lejano
-    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 10);
-    // También se indica dónde se coloca
-    this.camera.position.set (0.2, 0.05, 0.2);
-    // Y hacia dónde mira
-    var look = new THREE.Vector3 (0,0,0);
-    this.camera.lookAt(look);
-    this.add (this.camera);
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 50);
+      // Recuerda: Todas las unidades están en metros
+      // También se indica dónde se coloca
+      this.camera.position.set (5, 10, 5);
+      // Y hacia dónde mira
+      var look = new THREE.Vector3 (0,0,0);
+      this.camera.lookAt(look);
     
-    // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
-    this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
-    
-    // Se configuran las velocidades de los movimientos
-    this.cameraControl.rotateSpeed = 5;
-    this.cameraControl.zoomSpeed = -2;
-    this.cameraControl.panSpeed = 0.5;
-    // Debe orbitar con respecto al punto de mira de la cámara
-    this.cameraControl.target = look;
+    // // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
+    // this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
+    // // Se configuran las velocidades de los movimientos
+    // this.cameraControl.rotateSpeed = 5;
+    // this.cameraControl.zoomSpeed = -2;
+    // this.cameraControl.panSpeed = 0.5;
+    // // Debe orbitar con respecto al punto de mira de la cámara
+    // this.cameraControl.target = look;
+  }
+
+  cambiarCamara(turno) {
+  
+    let angulo = 0;
+
+    if(turno == "lila") {
+      angulo = -Math.PI/4;
+    }
+    else if(turno == "blanco") {
+      angulo = 3*Math.PI/4;
+    }
+
+    // Guardamos el valor actual de rotación
+    const actual = { y: this.camara.rotation.y };
+
+    // Rotamos la cámara
+    new TWEEN.Tween(actual)
+      .to({ y: angulo }, 1000)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate(() => {
+        this.camara.rotation.y = actual.y;
+      })
+      .start();
+  }
+
+  cambiarCamaraLucha() {
+
+    // Guardamos el valor actual de rotación
+    const actual = { y: this.camara.rotation.y };
+
+    // Rotamos la cámara
+    new TWEEN.Tween(actual)
+      .to({ y: this.camara.rotation.y-Math.PI/2}, 1000)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate(() => {
+        this.camara.rotation.y = actual.y;
+      })
+      .start();
   }
   
   createGround () {
     // El suelo es un Mesh, necesita una geometría y un material.
     
     // La geometría es una caja con muy poca altura
-    var geometryGround = new THREE.BoxGeometry (0.5,0.02,0.5);
+    var geometryGround = new THREE.BoxGeometry (10,0.2,10);
+    var cilindro = new THREE.CylinderGeometry(2.5,2.5,10);
+    cilindro.translate(0,-5.1,0);
     
     // El material se hará con una textura de madera
     var texture = new THREE.TextureLoader().load('../imgs/wood.jpg');
@@ -89,13 +249,15 @@ class MyScene extends THREE.Scene {
     
     // Ya se puede construir el Mesh
     var ground = new THREE.Mesh (geometryGround, materialGround);
+    var pata = new THREE.Mesh(cilindro,materialGround);
     
     // Todas las figuras se crean centradas en el origen.
     // El suelo lo bajamos la mitad de su altura para que el origen del mundo se quede en su lado superior
-    ground.position.y = -0.01;
+    ground.position.y = -0.125;
     
     // Que no se nos olvide añadirlo a la escena, que en este caso es  this
     this.add (ground);
+    this.add(pata);
   }
   
   createGUI () {
@@ -107,7 +269,7 @@ class MyScene extends THREE.Scene {
     // En este caso la intensidad de la luz y si se muestran o no los ejes
     this.guiControls = {
       // En el contexto de una función   this   alude a la función
-      lightPower : 50.0,  // La potencia de esta fuente de luz se mide en lúmenes
+      lightPower : 500.0,  // La potencia de esta fuente de luz se mide en lúmenes
       ambientIntensity : 0.5,   
       axisOnOff : true
     }
@@ -138,7 +300,7 @@ class MyScene extends THREE.Scene {
     // La luz ambiental solo tiene un color y una intensidad
     // Se declara como   var   y va a ser una variable local a este método
     //    se hace así puesto que no va a ser accedida desde otros métodos
-    this.ambientLight = new THREE.AmbientLight('white', this.guiControls.ambientIntensity);
+    this.ambientLight = new THREE.AmbientLight("white", this.guiControls.ambientIntensity);
     // La añadimos a la escena
     this.add (this.ambientLight);
     
@@ -146,9 +308,9 @@ class MyScene extends THREE.Scene {
     // La luz focal, además tiene una posición, y un punto de mira
     // Si no se le da punto de mira, apuntará al (0,0,0) en coordenadas del mundo
     // En este caso se declara como   this.atributo   para que sea un atributo accesible desde otros métodos.
-    this.pointLight = new THREE.SpotLight( 0xffffff );
+    this.pointLight = new THREE.PointLight( 0xffffff );
     this.pointLight.power = this.guiControls.lightPower;
-    this.pointLight.position.set( 2, 3, 1 );
+    this.pointLight.position.set( 0, 3, 0 );
     this.add (this.pointLight);
   }
   
@@ -195,7 +357,7 @@ class MyScene extends THREE.Scene {
     // Y si se cambia ese dato hay que actualizar la matriz de proyección de la cámara
     this.camera.updateProjectionMatrix();
   }
-    
+  
   onWindowResize () {
     // Este método es llamado cada vez que el usuario modifica el tamapo de la ventana de la aplicación
     // Hay que actualizar el ratio de aspecto de la cámara
@@ -206,22 +368,28 @@ class MyScene extends THREE.Scene {
   }
 
   update () {
-    // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
-    this.renderer.render (this, this.getCamera());
-
+    
+    if (this.stats) this.stats.update();
+    
+    // Se actualizan los elementos de la escena para cada frame
+    
     // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update();
+    //this.cameraControl.update();
     
     // Se actualiza el resto del modelo
     this.model.update();
     
+    // Le decimos al renderizador "visualiza la escena que te indico usando la cámara que te estoy pasando"
+    this.renderer.render (this, this.getCamera());
+
     // Este método debe ser llamado cada vez que queramos visualizar la escena de nuevo.
     // Literalmente le decimos al navegador: "La próxima vez que haya que refrescar la pantalla, llama al método que te indico".
     // Si no existiera esta línea,  update()  se ejecutaría solo la primera vez.
     requestAnimationFrame(() => this.update())
+
+    TWEEN.update();
   }
 }
-
 
 /// La función   main
 $(function () {
