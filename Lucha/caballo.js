@@ -18,7 +18,7 @@ class caballo extends Pieza {
     //importamos el modelo del caballo
     var objectLoader = new OBJLoader ( ) ;
 
-    objectLoader.load ( './Seahorse2.0.obj' ,
+    objectLoader.load ( '../models/Seahorse2.0.obj' ,
     ( object ) => {
       //object.scale.set(0.5, 0.5, 0.5);
       object.position.set(0,1.9,0.3);
