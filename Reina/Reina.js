@@ -7,8 +7,19 @@ class Reina extends THREE.Object3D {
     this.createGUI(gui,titleGui);
 
     // Material
-    this.Mat = new THREE.MeshNormalMaterial;
+    this.Mat = new THREE.MeshStandardMaterial({color:0xD29BFD});
+ 
+    var loader = new THREE.TextureLoader ( ) ;
+    var textura = loader.load("../imgs/marmol-blanco.jpg");
+    var materialMarmol = new THREE.MeshStandardMaterial({map:textura});
+
+    const materialDorado = new THREE.MeshStandardMaterial({
+      color: 0xffd700,       // Color dorado (hex)
+      metalness: 0.9,        // Máxima apariencia metálica
+      roughness: 0.2,        // Un poco rugoso para dar realismo
+    });
     
+
     //Creamos la base por revolución
     var shape_base = new THREE.Shape();
     shape_base.moveTo(0,0.52);
@@ -26,16 +37,16 @@ class Reina extends THREE.Object3D {
 
     var Geom_base = new THREE.LatheGeometry(puntos_base,24,0,Math.PI*2);
     Geom_base.translate(0,-0.52,0);
-    var base = new THREE.Mesh(Geom_base,this.Mat);
+    var base = new THREE.Mesh(Geom_base, materialMarmol);
 
     //Creamos el cuerpo
     var Geom_cuerpo = new THREE.CylinderGeometry(0.8,0.8,3,32,32);
     Geom_cuerpo.translate(0,3.34,0);
-    var cuerpo_brush = new CSG.Brush(Geom_cuerpo,this.Mat);
+    var cuerpo_brush = new CSG.Brush(Geom_cuerpo, materialMarmol);
 
     //Hacemos los huecos de la columna
     this.evaluador = new CSG.Evaluator();
-    var huecos = this.generarHuecos(20,0.1,3);    
+    var huecos = this.generarHuecos(20,0.1,3, materialMarmol);    
     var cuerpo = this.evaluador.evaluate(cuerpo_brush,huecos,CSG.SUBTRACTION);
 
     //Creamos la base del capitel por revolución
@@ -52,7 +63,7 @@ class Reina extends THREE.Object3D {
     var Geom_base_capitel = new THREE.LatheGeometry(puntos_base_capitel,24,0,Math.PI*2);
     Geom_base_capitel.scale(0.5,0.5,0.5);
     Geom_base_capitel.translate(0,4.84,0);
-    var base_capitel = new THREE.Mesh(Geom_base_capitel,this.Mat);
+    var base_capitel = new THREE.Mesh(Geom_base_capitel, materialMarmol);
 
     //Hacemos las espirales del capitel
 
@@ -70,20 +81,20 @@ class Reina extends THREE.Object3D {
     var geom_base_espirales = new THREE.ExtrudeGeometry(shape_base_espirales,optionsExtr);
     geom_base_espirales.scale(0.8,0.8,0.8);
     geom_base_espirales.translate(0,5.4,-0.65);
-    var base_espirales = new THREE.Mesh(geom_base_espirales,this.Mat);
+    var base_espirales = new THREE.Mesh(geom_base_espirales, materialMarmol);
 
     //Hacemos las espirales de la parte delantera
     var espirales_delanteras = new THREE.Object3D();
 
-    var espiral1 = this.crearEspiral(3,500,0.1,0.5,0);
-    var espiral2 = this.crearEspiral(3,500,0.1,0.5,0);
+    var espiral1 = this.crearEspiral(3,500,0.1,0.5,0, materialMarmol);
+    var espiral2 = this.crearEspiral(3,500,0.1,0.5,0, materialMarmol);
     espiral2.rotateY(Math.PI);
     espiral2.position.set(0,0,1.5);
 
     var geom_cilindro = new THREE.CylinderGeometry(0.04,0.04,2.5,32,32);
     geom_cilindro.rotateZ(Math.PI/2);
     geom_cilindro.translate(0,6.05,0.75);
-    var cilindro = new THREE.Mesh(geom_cilindro,this.Mat);
+    var cilindro = new THREE.Mesh(geom_cilindro, materialMarmol);
 
     espirales_delanteras.add(espiral1);
     espirales_delanteras.add(espiral2);
@@ -98,12 +109,12 @@ class Reina extends THREE.Object3D {
 
     var geom_cilindro_corona = new THREE.CylinderGeometry(1.1,1.1,0.4,32,32);
     geom_cilindro_corona.translate(0,6.8,0);
-    var cilindro_corona_mesh = new THREE.Mesh(geom_cilindro_corona,this.Mat);
+    var cilindro_corona_mesh = new THREE.Mesh(geom_cilindro_corona, materialDorado);
 
     var geom_toro_corona = new THREE.TorusGeometry(1.1,0.1,32);
     geom_toro_corona.rotateX(Math.PI/2);
     geom_toro_corona.translate(0,7,0);
-    var toro_corona_mesh = new THREE.Mesh(geom_toro_corona,this.Mat);
+    var toro_corona_mesh = new THREE.Mesh(geom_toro_corona, materialDorado);
 
     var shape_punta = new THREE.Shape();
     shape_punta.moveTo(-1,0);
@@ -121,7 +132,7 @@ class Reina extends THREE.Object3D {
       geom_punta.rotateX(0.2);
       geom_punta.translate(0,7,0.75);
       geom_punta.rotateY(2*Math.PI*i/8);
-      var punta_mesh = new THREE.Mesh(geom_punta,this.Mat);
+      var punta_mesh = new THREE.Mesh(geom_punta, materialDorado);
       corona.add(punta_mesh);
     }
    
@@ -129,33 +140,49 @@ class Reina extends THREE.Object3D {
     corona.add(cilindro_corona_mesh);
 
     //Lanza
+
+    var materialMango = new THREE.MeshStandardMaterial({color: 0x6c3b2a});
+    var materialAdornos= new THREE.MeshStandardMaterial({color: 0xD29BFD});
+    const metalMaterial = new THREE.MeshStandardMaterial({
+        color: 0x9c9c9c,      // color plateado claro
+        metalness: 0.8,       // completamente metálico
+        roughness: 0.2,      // muy pulido, casi como espejo
+        envMapIntensity: 1.5,  // reflejos intensos si hay envMap
+        flatShading: true
+    });
+
     var lanza = new THREE.Object3D();
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // luz general
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(2, 6, 0);
+    lanza.add(ambientLight, directionalLight);
 
     var geom_palo = new THREE.CylinderGeometry(0.1,0.1,6,32,32);
     geom_palo.translate(0,3.125,0);
-    var palo_mesh = new THREE.Mesh(geom_palo,this.Mat);
+    var palo_mesh = new THREE.Mesh(geom_palo, materialMango);
 
     var geom_bolita = new THREE.SphereGeometry(0.15);
     geom_bolita.translate(0,0.075,0);
-    var bolita_mesh = new THREE.Mesh(geom_bolita,this.Mat);
+    var bolita_mesh = new THREE.Mesh(geom_bolita, materialAdornos);
 
     var geom_adorno = new THREE.TorusGeometry(0.1,0.05,32);
     geom_adorno.rotateX(Math.PI/2);
     geom_adorno.translate(0,0.125,0);
-    var adorno_mesh1 = new THREE.Mesh(geom_adorno,this.Mat);
-    var adorno_mesh2 = new THREE.Mesh(geom_adorno,this.Mat);
-    var adorno_mesh3 = new THREE.Mesh(geom_adorno,this.Mat);
+    var adorno_mesh1 = new THREE.Mesh(geom_adorno, materialAdornos);
+    var adorno_mesh2 = new THREE.Mesh(geom_adorno, materialAdornos);
+    var adorno_mesh3 = new THREE.Mesh(geom_adorno, materialAdornos);
     adorno_mesh2.translateY(6);
     adorno_mesh3.translateY(5.8);
 
     var geom_punta_superior = new THREE.ConeGeometry(0.2,1,4);
     geom_punta_superior.translate(0,6.9,0);
-    var punta_superior_mesh = new THREE.Mesh(geom_punta_superior,this.Mat);
+    var punta_superior_mesh = new THREE.Mesh(geom_punta_superior, metalMaterial);
 
     var geom_punta_inferior = new THREE.ConeGeometry(0.2,0.4,4);
     geom_punta_inferior.rotateZ(Math.PI);
     geom_punta_inferior.translate(0,6.2,0);
-    var punta_inferior_mesh = new THREE.Mesh(geom_punta_inferior,this.Mat);
+    var punta_inferior_mesh = new THREE.Mesh(geom_punta_inferior, metalMaterial);
 
     lanza.translateX(2.4);
     lanza.translateZ(0.4);
@@ -170,12 +197,12 @@ class Reina extends THREE.Object3D {
     lanza.add(palo_mesh);
 
     //Brazos
-    var brazo_dcho = this.crearBrazo(0,0.2);
+    var brazo_dcho = this.crearBrazo(0,0.2, materialMarmol);
     brazo_dcho.translateX(-2);
     brazo_dcho.translateY(5.4);
     brazo_dcho.rotateZ(-0.1);
 
-    var brazo_izq = this.crearBrazo(-0.3,2);
+    var brazo_izq = this.crearBrazo(-0.3,2, materialMarmol);
     brazo_izq.translateX(2);
     brazo_izq.translateY(5.4);
     brazo_izq.rotateZ(0.2);
@@ -197,7 +224,7 @@ class Reina extends THREE.Object3D {
 
   }
 
-  generarHuecos(num_huecos,radio,altura) {
+  generarHuecos(num_huecos,radio,altura, materialMarmol) {
 
     var huecos = null;
 
@@ -205,7 +232,7 @@ class Reina extends THREE.Object3D {
       var geom_hueco_columna = new THREE.CylinderGeometry(radio,radio,altura,32,32);
       geom_hueco_columna.translate(0,3.34,0.75);
       geom_hueco_columna.rotateY(i*2*Math.PI/num_huecos);
-      var hueco_brush = new CSG.Brush(geom_hueco_columna,this.Mat);
+      var hueco_brush = new CSG.Brush(geom_hueco_columna, materialMarmol);
       if(i==0) {
         huecos = hueco_brush;
       }
@@ -234,7 +261,7 @@ class Reina extends THREE.Object3D {
     return puntos;
   }
 
-  crearEspiral(vueltas,pasos,radioInicial,radioFinal,altura) {
+  crearEspiral(vueltas,pasos,radioInicial,radioFinal,altura, materialMarmol) {
     var shape_espiral = new THREE.Shape();
     shape_espiral.absarc(0,0,0.04,0,2*Math.PI-0.01);
 
@@ -245,28 +272,28 @@ class Reina extends THREE.Object3D {
     var geom_espiral = new THREE.ExtrudeGeometry(shape_espiral,options);
     geom_espiral.rotateZ(Math.PI/2);
     geom_espiral.translate(-1.25,5.55,0.75);
-    var espiral = new THREE.Mesh(geom_espiral,this.Mat);
+    var espiral = new THREE.Mesh(geom_espiral, materialMarmol);
     
     return espiral;
   }
 
-  crearBrazo(anguloX, anguloZ) {
+  crearBrazo(anguloX, anguloZ, materialMarmol) {
     var brazo = new THREE.Object3D();
     var parte_inf = new THREE.Object3D();
 
     //Manos
     var geom_mano = new THREE.SphereGeometry(0.3);
     geom_mano.translate(0,-1.5,0);
-    var mano = new THREE.Mesh(geom_mano,this.Mat);
+    var mano = new THREE.Mesh(geom_mano,materialMarmol);
 
     //Antebrazos
     var geom_antebrazo = new THREE.CylinderGeometry(0.2,0.15,1.5,32,32);
     geom_antebrazo.translate(0, -0.75,0);
-    var antebrazo = new THREE.Mesh(geom_antebrazo,this.Mat);
+    var antebrazo = new THREE.Mesh(geom_antebrazo,materialMarmol);
     
     //Codos
     var geom_codo = new THREE.SphereGeometry(0.2);
-    var codo = new THREE.Mesh(geom_codo,this.Mat);
+    var codo = new THREE.Mesh(geom_codo,materialMarmol);
 
     parte_inf.add(codo);
     parte_inf.add(antebrazo);
@@ -279,11 +306,11 @@ class Reina extends THREE.Object3D {
     //Parte superior del brazo
     var geom_brazo_sup = new THREE.CylinderGeometry(0.25,0.2,1.2,32,32);
     geom_brazo_sup.translate(0,-0.6,0);
-    var brazo_sup = new THREE.Mesh(geom_brazo_sup,this.Mat);
+    var brazo_sup = new THREE.Mesh(geom_brazo_sup,materialMarmol);
 
     //Hombros
     var geom_hombro = new THREE.SphereGeometry(0.35);
-    var hombro = new THREE.Mesh(geom_hombro,this.Mat);
+    var hombro = new THREE.Mesh(geom_hombro,materialMarmol);
   
     brazo.add(parte_inf);
     brazo.add(brazo_sup);

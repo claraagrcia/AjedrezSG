@@ -10,7 +10,7 @@ class Rey extends THREE.Object3D {
     this.createGUI(gui,titleGui);
 
     // Material
-    this.Mat = new THREE.MeshNormalMaterial;
+    this.Mat = new THREE.MeshStandardMaterial({color: 0xD29BFD});
     var loader = new THREE.TextureLoader ( ) ;
     var textura = loader.load("../imgs/marmol-blanco.jpg");
     var materialMarmol = new THREE.MeshStandardMaterial({map:textura });
