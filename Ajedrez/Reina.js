@@ -406,7 +406,7 @@ class Reina extends Pieza {
 
   lucha(pieza_seleccionada,casilla_seleccionada,tablero,escena) {
 
-    //Ponemos una luz direccional
+    //Ponemos una luz focal
     var spotLight = new THREE. SpotLight (0xfcfcfc) ;
 
     spotLight . power = 350;
@@ -422,20 +422,20 @@ class Reina extends Pieza {
     const mano = this.mano;
     const lanza = this.lanza;
 
-    // Posición actual
+    // Obtenemos la posición actual de la reina
     const origen = new THREE.Vector3();
     this.reina.getWorldPosition(origen);
 
-    // Posición del objetivo
+    // Obtenemos la posición actual de la pieza enemiga
     const destino = new THREE.Vector3();
     casilla_seleccionada.pieza.getMesh().getWorldPosition(destino);
 
-    // Dirección en plano XZ
+    // Calculamos el ángulo que hay entre las piezas
     const dx = destino.x - origen.x;
     const dz = destino.z - origen.z;
-
-    // Calculamos ángulo (asumiendo que el peón por defecto mira en Z+)
     const angulo = Math.atan2(dx, dz);
+
+    //Rotamos a la reina para que mire hacia el objetivo
     new TWEEN.Tween(this.reina.rotation)
     .to({ y: angulo }, 500)
     .easing(TWEEN.Easing.Quadratic.Out)
@@ -489,8 +489,6 @@ class Reina extends Pieza {
             brazo_izq.parte_inf.rotation.y = obj.rot_brazo;
           })
           .onComplete(() => {
-            //lanza.mover(casilla_seleccionada,tablero,escena);
-            
             
             const worldPosition = new THREE.Vector3();
             lanza.getWorldPosition(worldPosition);
@@ -514,7 +512,6 @@ class Reina extends Pieza {
             .onComplete(() => {
 
               casilla_seleccionada.pieza.changeColor(rojo);
-              //pieza_seleccionada.mover(casilla_seleccionada,tablero,escena);
 
               //Volvemos hacia atrás el impulso tween 6
               new TWEEN.Tween({rot_brazo: this.brazo_izq.parte_inf.rotation.y})
@@ -540,6 +537,7 @@ class Reina extends Pieza {
                   })
                   .onComplete(() => { 
 
+                    //Volvemos a la posición inicial
                     new TWEEN.Tween({parte_superior: this.brazo_izq.rotation.z, parte_inferior: this.brazo_izq.parte_inf.rotation.z})
                     .to({
                       parte_superior: 0,

@@ -9,10 +9,10 @@ class Rey extends Pieza {
     this.tipo = "Rey";
 
     // Material
-    this.Mat = new THREE.MeshStandardMaterial({color:this.color});
+    this.Mat = new THREE.MeshStandardMaterial({color:color});
     var loader = new THREE.TextureLoader ( ) ;
     var textura = loader.load("../imgs/marmol-blanco.jpg");
-    var materialMarmol = new THREE.MeshStandardMaterial({map:textura,color:this.color });
+    var materialMarmol = new THREE.MeshStandardMaterial({map:textura,color:color });
     const materialDorado = new THREE.MeshStandardMaterial({
       color: 0xffd700,       // Color dorado (hex)
       metalness: 0.9,        // Máxima apariencia metálica

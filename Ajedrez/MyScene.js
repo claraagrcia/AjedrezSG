@@ -116,6 +116,7 @@ class MyScene extends THREE.Scene {
       if (pickedCasillas.length > 0 && this.piezaSeleccionada) {
         this.casilla_seleccionada = pickedCasillas[0].object.userData;
 
+          //Si la reina va a capturar una pieza, cambiamos la cámara y hacemos la lucha
           if(this.piezaSeleccionada instanceof Reina && this.casilla_seleccionada.pieza != null) {
             this.cambiarCamaraLucha();
             this.piezaSeleccionada.lucha(this.piezaSeleccionada,this.casilla_seleccionada,this.model,this);
@@ -135,7 +136,7 @@ class MyScene extends THREE.Scene {
           
           this.estado = 0;
     
-          // Limpiar los atributos correspondientes
+          // Limpiamos los atributos correspondientes
           this.piezaSeleccionada = null;
           this.casilla_seleccionada = null;
           this.casillas_validas = null;
@@ -185,14 +186,14 @@ class MyScene extends THREE.Scene {
       var look = new THREE.Vector3 (0,0,0);
       this.camera.lookAt(look);
     
-    // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
-    this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
-    // Se configuran las velocidades de los movimientos
-    this.cameraControl.rotateSpeed = 5;
-    this.cameraControl.zoomSpeed = -2;
-    this.cameraControl.panSpeed = 0.5;
-    // Debe orbitar con respecto al punto de mira de la cámara
-    this.cameraControl.target = look;
+    // // Para el control de cámara usamos una clase que ya tiene implementado los movimientos de órbita
+    // this.cameraControl = new TrackballControls (this.camera, this.renderer.domElement);
+    // // Se configuran las velocidades de los movimientos
+    // this.cameraControl.rotateSpeed = 5;
+    // this.cameraControl.zoomSpeed = -2;
+    // this.cameraControl.panSpeed = 0.5;
+    // // Debe orbitar con respecto al punto de mira de la cámara
+    // this.cameraControl.target = look;
   }
 
   cambiarCamara(turno) {
@@ -206,10 +207,10 @@ class MyScene extends THREE.Scene {
       angulo = 3*Math.PI/4;
     }
 
-    // Guardar el valor actual de rotación
+    // Guardamos el valor actual de rotación
     const actual = { y: this.camara.rotation.y };
 
-    // Tween sobre objeto plano
+    // Rotamos la cámara
     new TWEEN.Tween(actual)
       .to({ y: angulo }, 1000)
       .easing(TWEEN.Easing.Quadratic.InOut)
@@ -221,10 +222,10 @@ class MyScene extends THREE.Scene {
 
   cambiarCamaraLucha() {
 
-    // Guardar el valor actual de rotación
+    // Guardamos el valor actual de rotación
     const actual = { y: this.camara.rotation.y };
 
-    // Tween sobre objeto plano
+    // Rotamos la cámara
     new TWEEN.Tween(actual)
       .to({ y: this.camara.rotation.y-Math.PI/2}, 1000)
       .easing(TWEEN.Easing.Quadratic.InOut)
@@ -373,7 +374,7 @@ class MyScene extends THREE.Scene {
     // Se actualizan los elementos de la escena para cada frame
     
     // Se actualiza la posición de la cámara según su controlador
-    this.cameraControl.update();
+    //this.cameraControl.update();
     
     // Se actualiza el resto del modelo
     this.model.update();

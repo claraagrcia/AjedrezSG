@@ -5,10 +5,11 @@ import { lila,blanco,rojo } from './Tablero.js';
 class Pieza extends THREE.Object3D {
     constructor(color,casilla) {
         super();
-        this.color = color;
+        this.color = new THREE.Color(color).getHex();;
         this.casilla = casilla;
         this.seleccionada = false;
         this.tipo;
+        this.colorInicial = color;
     }
     
     //método abstracto (se implementa en cada clase concreta)
@@ -44,16 +45,19 @@ class Pieza extends THREE.Object3D {
             .onComplete(() => {
                 console.log("Movimiento completado");
 
-                //Si la casilla seleccionada tiene una pieza, borrarla
-                console.log(casilla_seleccionada.pieza);
+                //Si la casilla seleccionada tiene una pieza, la borramos
                 if(casilla_seleccionada.pieza != null) {
-                    if(casilla_seleccionada.pieza.color == lila) {
+                    if(casilla_seleccionada.pieza.colorInicial == lila) {
                         var index = tablero.piezas_seleccionables_lilas.indexOf(casilla_seleccionada.pieza.getMesh());
-                        tablero.piezas_seleccionables_lilas.splice(index,1);
+                        if(index != -1) {
+                            tablero.piezas_seleccionables_lilas.splice(index,1);
+                        }
                     }
-                    else if(casilla_seleccionada.pieza.color == blanco) {
+                    else if(casilla_seleccionada.pieza.colorInicial == blanco) {
                         var index = tablero.piezas_seleccionables_blancas.indexOf(casilla_seleccionada.pieza.getMesh());
-                        tablero.piezas_seleccionables_blancas.splice(index,1);
+                        if(index != -1) {
+                            tablero.piezas_seleccionables_blancas.splice(index,1);
+                        }
                     }
                     casilla_seleccionada.removePieza();
                 }
@@ -97,7 +101,7 @@ class Pieza extends THREE.Object3D {
     changeColor(nuevo_color) {
         this.color = nuevo_color;
 
-        // Recorrer todos los hijos del Object3D
+        // Recorremos todos los hijos del Object3D
         this.getMesh().traverse((child) => {
             if (child.isMesh && child.material && child.material.color) {
             child.material.color.set(nuevo_color);
