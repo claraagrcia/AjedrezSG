@@ -13,7 +13,7 @@ class peon extends THREE.Object3D {
     var peon = new THREE.Object3D();
     const textureLoader = new THREE.TextureLoader();
     const normalMap = textureLoader.load("../imgs/flor.png");
-    var Mat = new THREE.MeshStandardMaterial({color: color, normalMap: normalMap, normalScale: new THREE.Vector2(1, 1)});
+    var Mat = new THREE.MeshStandardMaterial({color: 0xD29BFD, normalMap: normalMap, normalScale: new THREE.Vector2(1, 1)});
     //*********************Cuerpo********************** */
 
     //Creamos el contorno que vamos a revolucionar para hacer el contorno del cuerpo del peon
@@ -30,7 +30,7 @@ class peon extends THREE.Object3D {
     shape.lineTo(0, 3.5);
 
     //Creamos el material
-    var material = new THREE.MeshStandardMaterial({color:"white"});
+    var material = new THREE.MeshStandardMaterial({color:0xD29BFD});
 
     //Extraemos los puntos del shape
     var points = shape.extractPoints(20).shape;

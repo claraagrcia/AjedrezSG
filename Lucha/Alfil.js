@@ -1,19 +1,19 @@
 import * as THREE from '../libs/three.module.js'
 import * as CSG from '../libs/three-bvh-csg.js'
+import { Pieza } from './Pieza.js';
+import { rojo,verde } from './Tablero.js';
  
-class Alfil extends THREE.Object3D {
-  constructor(gui,titleGui) {
-    super();
+class Alfil extends Pieza {
+  constructor(color,casilla) {
+    super(color,casilla);
+    this.tipo = "Alfil";
     
-    // Se crea la parte de la interfaz que corresponde a la caja
-    // Se crea primero porque otros métodos usan las variables que se definen para la interfaz
-    this.createGUI(gui,titleGui);
-
     // Material
+  
     const textureLoader = new THREE.TextureLoader();
     const normalMap = textureLoader.load("../imgs/flor.png");
-    var Mat = new THREE.MeshStandardMaterial({color: 0xD29BFD, normalMap: normalMap});
-    
+    var Mat = new THREE.MeshStandardMaterial({color: color, normalMap: normalMap});
+
     //Creampos  la forma del cuerpo
     var shape1_cuerpo = new THREE.Shape();
     shape1_cuerpo.moveTo(0,-2);
@@ -70,19 +70,19 @@ class Alfil extends THREE.Object3D {
     shape_cabeza.quadraticCurveTo(2,0,2,0.5);
     shape_cabeza.quadraticCurveTo(2,1,1.5,0.9);
     shape_cabeza.quadraticCurveTo(1.6,1.2,1.45,1.4);
-      shape_cabeza.quadraticCurveTo(1.3,1.6,1.1,1.7);
+    shape_cabeza.quadraticCurveTo(1.3,1.6,1.1,1.7);
     shape_cabeza.quadraticCurveTo(1.4,1.8,1.7,2);
     shape_cabeza.quadraticCurveTo(1.9,2.3,2,2.7);
     shape_cabeza.quadraticCurveTo(1.7,4.7,0,6);
 
-    var puntos = shape_cabeza.extractPoints(20).shape;
+    var puntos = shape_cabeza.extractPoints(5).shape;
 
     var Geom_cabeza = new THREE.LatheGeometry(puntos,24,0,Math.PI*2);
     Geom_cabeza.translate(0,8,0.25);
     var brush_cabeza = new CSG.Brush(Geom_cabeza,Mat);
 
     // Bola superior de la cabeza
-    var bola_cabeza = new THREE.SphereGeometry(0.5,32,32);
+    var bola_cabeza = new THREE.SphereGeometry(0.5,10,10);
     bola_cabeza.scale(1,0.7,1);
     bola_cabeza.translate(0,14,0.25);
     var mesh_bola_cabeza = new THREE.Mesh(bola_cabeza,Mat);
@@ -121,25 +121,51 @@ class Alfil extends THREE.Object3D {
     shape_base.quadraticCurveTo(1.3,1.6,1.1,1.7);
     shape_base.lineTo(0,1.7);
 
-    var puntos_base = shape_base.extractPoints(20).shape;
+    var puntos_base = shape_base.extractPoints(5).shape;
 
     var Geom_base = new THREE.LatheGeometry(puntos_base,24,0,Math.PI*2);
     Geom_base.scale(2,1,2);
     Geom_base.translate(0,-1.1,0);
     var mesh_base = new THREE.Mesh(Geom_base,Mat);
     
-    
-    var alfil = new THREE.Object3D();
-    alfil.add(cuerpo);
-    alfil.add(cabeza);
-    alfil.add(mesh_bola_cabeza);
-    alfil.add(mesh_base);
+    let contenedor = new THREE.Object3D(); 
+    contenedor.add(cuerpo);
+    contenedor.add(cabeza);
+    contenedor.add(mesh_bola_cabeza);
+    contenedor.add(mesh_base);
 
-    alfil.scale.set(0.1, 0.1, 0.1);
-    alfil.translateY(0.11);
+    contenedor.position.y = 1.1;
 
-    this.add(alfil);
+    this.alfil = new THREE.Object3D();
+    this.alfil.add(contenedor);
+    this.alfil.scale.set(0.1, 0.1, 0.1);
 
+    this.alfil.userData.refPieza = this;
+    this.add(this.alfil);
+
+  }
+
+  getMesh() {
+    return this.alfil;
+  }
+
+  onClick(tablero) {
+    this.seleccionada = !this.seleccionada;
+    let casillas_validas = this.movimientoPosibles(tablero);
+
+    casillas_validas.forEach(casilla_valida => {
+      if(this.seleccionada) {
+        casilla_valida.setColor(verde);
+        if(casilla_valida.pieza != null) {
+          casilla_valida.setColor(rojo);
+        }
+      }
+      else {
+        casilla_valida.setColor(casilla_valida.colorInicial);
+      }
+    }) 
+
+    return casillas_validas;
   }
 
   crearHelice(radio,paso,num_vueltas,espacio_entre_puntos) {
@@ -158,69 +184,89 @@ class Alfil extends THREE.Object3D {
     return pts;
   }
   
-  createGUI (gui,titleGui) {
-    // Controles para el tamaño, la orientación y la posición de la caja
-    this.guiControls = {
-      sizeX : 1.0,
-      sizeY : 1.0,
-      sizeZ : 1.0,
-      
-      rotX : 0.0,
-      rotY : 0.0,
-      rotZ : 0.0,
-      
-      posX : 0.0,
-      posY : 0.0,
-      posZ : 0.0,
-      
-      // Un botón para dejarlo todo en su posición inicial
-      // Cuando se pulse se ejecutará esta función.
-      reset : () => {
-        this.guiControls.sizeX = 1.0;
-        this.guiControls.sizeY = 1.0;
-        this.guiControls.sizeZ = 1.0;
-        
-        this.guiControls.rotX = 0.0;
-        this.guiControls.rotY = 0.0;
-        this.guiControls.rotZ = 0.0;
-        
-        this.guiControls.posX = 0.0;
-        this.guiControls.posY = 0.0;
-        this.guiControls.posZ = 0.0;
+  movimientoPosibles(tablero) {
+
+    let casillas_validas = [];
+    let casilla_actual;
+    let i=this.casilla.posX;
+    let j=this.casilla.posY;
+    
+    //Diagonal ++
+    while(i<7 && j>0) {
+      i++;
+      j--;
+      casilla_actual = tablero[i][j];
+      if(casilla_actual.pieza!=null) {
+        i=7;
+        j=0;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
       }
-    } 
-    
-    // Se crea una sección para los controles de la caja
-    var folder = gui.addFolder (titleGui);
-    // Estas lineas son las que añaden los componentes de la interfaz
-    // Las tres cifras indican un valor mínimo, un máximo y el incremento
-    // El método   listen()   permite que si se cambia el valor de la variable en código, el deslizador de la interfaz se actualice
-    folder.add (this.guiControls, 'sizeX', 0.1, 5.0, 0.01).name ('Tamaño X : ').listen();
-    folder.add (this.guiControls, 'sizeY', 0.1, 5.0, 0.01).name ('Tamaño Y : ').listen();
-    folder.add (this.guiControls, 'sizeZ', 0.1, 5.0, 0.01).name ('Tamaño Z : ').listen();
-    
-    folder.add (this.guiControls, 'rotX', 0.0, Math.PI/2, 0.01).name ('Rotación X : ').listen();
-    folder.add (this.guiControls, 'rotY', 0.0, Math.PI/2, 0.01).name ('Rotación Y : ').listen();
-    folder.add (this.guiControls, 'rotZ', 0.0, Math.PI/2, 0.01).name ('Rotación Z : ').listen();
-    
-    folder.add (this.guiControls, 'posX', -20.0, 20.0, 0.01).name ('Posición X : ').listen();
-    folder.add (this.guiControls, 'posY', 0.0, 10.0, 0.01).name ('Posición Y : ').listen();
-    folder.add (this.guiControls, 'posZ', -20.0, 20.0, 0.01).name ('Posición Z : ').listen();
-    
-    folder.add (this.guiControls, 'reset').name ('[ Reset ]');
-  }
-  
-  update () {
-    // Con independencia de cómo se escriban las 3 siguientes líneas, el orden en el que se aplican las transformaciones es:
-    // Primero, el escalado
-    // Segundo, la rotación en Z
-    // Después, la rotación en Y
-    // Luego, la rotación en X
-    // Y por último la traslación
-   
-    this.position.set (this.guiControls.posX,this.guiControls.posY,this.guiControls.posZ);
-    this.rotation.set (this.guiControls.rotX,this.guiControls.rotY,this.guiControls.rotZ);
-    this.scale.set (this.guiControls.sizeX,this.guiControls.sizeY,this.guiControls.sizeZ);
+      else {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+
+    //Diagonal +-
+    i=this.casilla.posX;
+    j=this.casilla.posY;
+    while(i<7 && j<7) {
+      i++;
+      j++;
+      casilla_actual = tablero[i][j];
+      if(casilla_actual.pieza!=null) {
+        i=7;
+        j=7;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+
+    //Diagonal --
+    i=this.casilla.posX;
+    j=this.casilla.posY;
+    while(i>0 && j<7) {
+      i--;
+      j++;
+      casilla_actual = tablero[i][j];
+      if(casilla_actual.pieza!=null) {
+        i=0;
+        j=7;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+
+    //Diagonal -+
+    i=this.casilla.posX;
+    j=this.casilla.posY;
+    while(i>0 && j>0) {
+      i--;
+      j--;
+      casilla_actual = tablero[i][j];
+      if(casilla_actual.pieza!=null) {
+        i=0;
+        j=0;
+        if(casilla_actual.pieza.color != this.color) {
+          casillas_validas.push(casilla_actual);
+        }
+      }
+      else {
+        casillas_validas.push(casilla_actual);
+      }
+    }
+
+    return casillas_validas;
+
   }
 }
 
