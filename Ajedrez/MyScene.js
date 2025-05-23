@@ -115,7 +115,7 @@ class MyScene extends THREE.Scene {
         this.casilla_seleccionada = pickedCasillas[0].object.userData;
 
           if(this.piezaSeleccionada instanceof Reina && this.casilla_seleccionada.pieza != null) {
-            //this.cambiarCamaraLucha();
+            this.cambiarCamaraLucha();
             this.piezaSeleccionada.lucha(this.piezaSeleccionada,this.casilla_seleccionada,this.model,this);
           }
           else {
@@ -214,7 +214,7 @@ class MyScene extends THREE.Scene {
 
     // Tween sobre objeto plano
     new TWEEN.Tween(actual)
-      .to({ y: this.camara.rotation.y+Math.PI/2}, 1000)
+      .to({ y: this.camara.rotation.y-Math.PI/2}, 1000)
       .easing(TWEEN.Easing.Quadratic.InOut)
       .onUpdate(() => {
         this.camara.rotation.y = actual.y;
